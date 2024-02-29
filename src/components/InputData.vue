@@ -1,0 +1,127 @@
+<template>
+  <div>
+    <label for="nombreEpp" id="nombre_epp">Nombre del EPP: </label>
+    <input type="text" v-model="nombreEpp" placeholder="Nombre del EPP"/>
+    <div>
+      <label for="parteCuerpoProteger" id="parte_cuerpo_proteger">Parte del Cuerpo a Proteger</label>
+      <input v-model="parteCuerpoProteger" placeholder="Parte del cuerpo a proteger" />
+    </div>
+    <div>
+      <label for="riesgoControlado" id="riesgo_controlado">Riesgo Controlado</label>
+      <input v-model="riesgoControlado" placeholder="Riesgo Controlado" />
+    </div>
+    <div>
+      <label for="cargoAsociado" id="cargo_asociado">Cargo Asociado </label>
+      <input v-model="cargoAsociado" placeholder="Cargo Asociado " />
+    </div>
+    <div>
+      <label for="especificacion_Tecnica" id="especificacionTecnica">Especificación Técnica</label>
+      <input v-model="especificacionTecnica" placeholder="Especificación Técnica " />
+    </div>
+    <div>
+      <label for="uso" id="uso">Uso </label>
+      <input v-model="uso" placeholder="uso " />
+    </div>
+    <div>
+      <label for="mantenimiento" id="mantenimiento">Mantenimiento </label>
+      <input v-model="mantenimiento" placeholder="Mantenimiento " />
+    </div>
+    <div>
+      <label for="vida_Util" id="vidautil">Vida Útil </label>
+      <input v-model="vidaUtil" placeholder="Vida Útil " />
+    </div>
+    <div>
+      <label for="reposicion" id="reposicion"> Reposición </label>
+      <input v-model="reposicion" placeholder=" Reposición " />
+    </div>
+    <div>
+      <label for="disposicion_Final" id="disposicion_final"> Disposición Final </label>
+      <input v-model="disposicionFinal" placeholder=" Disposición Final " />
+    </div>
+    <button @click="guardarItem">Guardar ítem</button>
+    <button @click="generarPDF">Generar PDF</button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      nombreEpp: "",
+      parteCuerpoProteger: "",
+      riesgoControlado: "",
+      cargoAsociado: "",
+      especificacionTecnica: "",
+      uso: "",
+      mantenimiento: "",
+      vidaUtil: "",
+      reposicion: "",
+      disposicionFinal: "",
+      items: [],
+    };
+  },
+  methods: {
+    guardarItem() {
+      this.items.push({
+        nombreEpp: this.nombreEpp,
+        parteCuerpoProteger: this.parteCuerpoProteger,
+        riesgoControlado: this.riesgoControlado,
+        cargoAsociado: this.cargoAsociado,
+        especificacionTecnica: this.especificacionTecnica,
+        uso: this.uso,
+        mantenimiento: this.mantenimiento,
+        vidaUtil: this.vidaUtil,
+        reposicion: this.reposicion,
+        disposicionFinal: this.disposicionFinal,
+      });
+      this.limpiarCampos();
+    },
+    limpiarCampos() {
+      this.nombreEpp = "";
+      this.parteCuerpoProteger = "";
+      this.riesgoControlado = "";
+      this.cargoAsociado = "";
+      this.especificacionTecnica = "";
+      this.uso = "";
+      this.mantenimiento = "";
+      this.vidaUtil = "";
+      this.reposicion = "";
+      this.disposicionFinal = "";
+    },
+    async generarPDF() {
+      const jsPDF = await import('jspdf')
+      const doc = new jsPDF.default();
+
+      doc.setDrawColor(0); 
+      doc.setLineWidth(0.2); 
+
+      function drawBorders(doc) {
+        doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
+        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
+        doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
+        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
+      }
+
+  
+      drawBorders(doc);
+      this.items.forEach((item, index) => {
+        doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 20 + (index * 10));
+        doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 30 + (index * 10));
+        doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 40 + (index * 10));
+        doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 50 + (index * 10));
+        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 60 + (index * 10));
+        doc.text(`Uso: ${item.uso}`, 10, 70 + (index * 10));
+        doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 80 + (index * 10));
+        doc.text(`Vida Util: ${item.vidaUtil}`, 10, 90 + (index * 10));
+        doc.text(`Reposicion: ${item.reposicion}`, 10, 100 + (index * 10));
+        doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 110 + (index * 10));
+      });
+
+      doc.save("informacion.pdf");
+    }
+  }
+};
+</script>
+
+<style>
+</style>

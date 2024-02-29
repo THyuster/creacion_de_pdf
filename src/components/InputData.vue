@@ -165,7 +165,7 @@ export default {
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
 
-      let startY = 50;
+      let startY = 30;
       let remainingData = [
         ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final'],
         ...this.items.map(item => [
@@ -192,7 +192,8 @@ export default {
           head: [remainingData[0]],
           setFontSize: (8),
           body: rowsForPage,
-          theme: 'grid'
+          theme: 'grid',
+          columnWidth: [40, 40, 30, 40, 40, 20, 30, 20, 30, 30],
         });
 
         remainingData = remainingData.slice(maxRows);

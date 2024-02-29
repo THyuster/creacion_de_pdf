@@ -106,15 +106,21 @@ export default {
 
       function drawHeader(doc) {
         doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
-        // doc.text('NIT: 123456789-0', 130, 10);
-        // doc.text('Código de Factura: ABC123', 150, 30); //el primer numero es para horiontal el segundo vertical
-        // const fechaActual = new Date().toLocaleDateString();
-        // doc.text(`Fecha: ${fechaActual}`, 160, 20);
-        // const totalPages = doc.internal.getNumberOfPages();
-        // for (let i = 1; i <= totalPages; i++) {
-        //   doc.setPage(i);
-        //   doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 35, 10);
-        // }
+        doc.text('Direccion De Mantenimiento', 65, 13)
+        doc.text('Actas De Mantenimiento Electrico', 61, 23)
+        doc.text('NIT', 138, 10);
+        doc.text('123456789-0', 132, 15);
+        doc.text('Código de Factura', 128, 20); //el primer numero es para horiontal el segundo vertical
+        doc.text('ABC123', 135, 27)
+        const fechaActual = new Date().toLocaleDateString();
+        doc.text('Fecha', 177, 21)
+        doc.text(`${fechaActual}`, 175, 27);
+        const totalPages = doc.internal.getNumberOfPages();
+        doc.text('Paginas', 176, 9)
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.text(`${i} de ${totalPages}`, doc.internal.pageSize.width - 33, 15);
+        }
         doc.line(5, 28, doc.internal.pageSize.width - 5, 28); //linea de separacion
         doc.line(46, 17, doc.internal.pageSize.width - 5, 17); //linea de la mitad del recuadro
         doc.line(46, 5, 46, doc.internal.pageSize.height - 269); // linea de separacion cuadros con imagen

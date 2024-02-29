@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg'; 
 export default {
   data() {
     return {
@@ -89,9 +90,10 @@ export default {
       this.disposicionFinal = "";
     },
     async generarPDF() {
-      const jsPDF = await import('jspdf')
+      const jsPDF = await import('jspdf');
       const doc = new jsPDF.default();
 
+      doc.setFontSize(8);
       doc.setDrawColor(0); 
       doc.setLineWidth(0.2); 
 
@@ -102,19 +104,35 @@ export default {
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
       }
 
-  
+      function drawHeader(doc) {
+        doc.addImage(imagenData, 'JPEG', 8, 8, 40, 20);
+        doc.text('NIT: 123456789-0', 130, 10);
+        doc.text('Código de Factura: ABC123', 150, 30); //el primer numero es para horiontal el segundo vertical
+        const fechaActual = new Date().toLocaleDateString();
+        doc.text(`Fecha: ${fechaActual}`, 160, 20);
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 35, 10);
+        }
+        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+      }
+      
+
       drawBorders(doc);
+      drawHeader(doc);
+
       this.items.forEach((item, index) => {
-        doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 20 + (index * 10));
-        doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 30 + (index * 10));
-        doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 40 + (index * 10));
-        doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 50 + (index * 10));
-        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 60 + (index * 10));
-        doc.text(`Uso: ${item.uso}`, 10, 70 + (index * 10));
-        doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 80 + (index * 10));
-        doc.text(`Vida Util: ${item.vidaUtil}`, 10, 90 + (index * 10));
-        doc.text(`Reposicion: ${item.reposicion}`, 10, 100 + (index * 10));
-        doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 110 + (index * 10));
+        doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 60 + (index * 100));
+        doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
+        doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
+        doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
+        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100));
+        doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
+        doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
+        doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
+        doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
+        doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
       });
 
       doc.save("informacion.pdf");

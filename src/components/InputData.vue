@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg'
 export default {
   data() {
     return {
@@ -125,6 +126,8 @@ export default {
 
       doc.setDrawColor(0); 
       doc.setLineWidth(0.2); 
+      doc.setFontSize(8);
+      
 
       // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
@@ -133,6 +136,31 @@ export default {
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
         
+      }
+      function drawHeader(doc) {
+        doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
+        doc.text('Direccion De Mantenimiento', 65, 13)
+        doc.text('Actas De Mantenimiento Electrico', 61, 23)
+        doc.text('NIT', 138, 10);
+        doc.text('123456789-0', 132, 15);
+        doc.text('Código de Factura', 128, 20); //el primer numero es para horiontal el segundo vertical
+        doc.text('ABC123', 135, 27)
+        const fechaActual = new Date().toLocaleDateString();
+        doc.text('Fecha', 177, 21)
+        doc.text(`${fechaActual}`, 175, 27);
+        const totalPages = doc.internal.getNumberOfPages();
+        doc.text('Paginas', 176, 9)
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.text(`${i} de ${totalPages}`, doc.internal.pageSize.width - 33, 15);
+        }
+        doc.line(5, 28, doc.internal.pageSize.width - 5, 28); //linea de separacion
+        doc.line(46, 17, doc.internal.pageSize.width - 5, 17); //linea de la mitad del recuadro
+        doc.line(46, 5, 46, doc.internal.pageSize.height - 269); // linea de separacion cuadros con imagen
+        doc.line(120, 5, 120, doc.internal.pageSize.height - 269); // linea de separacion parte media encabezado
+        doc.line(120, 11, doc.internal.pageSize.width - 5, 11); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(120, 23, doc.internal.pageSize.width - 5, 23); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(160, 5, 160, doc.internal.pageSize.height - 269); // linea de separacion recuadros parte izquierda
       }
 
       // Función para dibujar la tabla
@@ -165,7 +193,7 @@ export default {
 
       // Función para generar páginas adicionales si la tabla excede el espacio de una página
       function generatePDFPages(doc, itemsPerPage, items) {
-        let startY = 15;
+        let startY = 32;
         let margin = 10;
 
         let currentPageIndex = 0; // Índice de la página actual
@@ -204,7 +232,7 @@ export default {
           currentPageIndex++;
         }
       }
-
+      drawHeader(doc);
       drawBorders(doc);
       generatePDFPages(doc, this.itemsPerPage, this.items);
 

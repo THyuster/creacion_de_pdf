@@ -149,6 +149,7 @@ export default {
       doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
       doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
       doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
+      
     });
 
 

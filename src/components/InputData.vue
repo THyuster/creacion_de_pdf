@@ -99,7 +99,7 @@ export default {
 
       function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
-        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
+        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);  //lineas de los bordes 
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
       }
@@ -139,7 +139,7 @@ export default {
         doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
         doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
         doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
-        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100));
+        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100)); //titulos y datos en el pdf
         doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
         doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
         doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));

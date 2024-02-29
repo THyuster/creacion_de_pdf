@@ -105,17 +105,23 @@ export default {
       }
 
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'JPEG', 8, 8, 40, 20);
-        doc.text('NIT: 123456789-0', 130, 10);
-        doc.text('Código de Factura: ABC123', 150, 30); //el primer numero es para horiontal el segundo vertical
-        const fechaActual = new Date().toLocaleDateString();
-        doc.text(`Fecha: ${fechaActual}`, 160, 20);
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 35, 10);
-        }
-        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+        doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
+        // doc.text('NIT: 123456789-0', 130, 10);
+        // doc.text('Código de Factura: ABC123', 150, 30); //el primer numero es para horiontal el segundo vertical
+        // const fechaActual = new Date().toLocaleDateString();
+        // doc.text(`Fecha: ${fechaActual}`, 160, 20);
+        // const totalPages = doc.internal.getNumberOfPages();
+        // for (let i = 1; i <= totalPages; i++) {
+        //   doc.setPage(i);
+        //   doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 35, 10);
+        // }
+        doc.line(5, 28, doc.internal.pageSize.width - 5, 28); //linea de separacion
+        doc.line(46, 17, doc.internal.pageSize.width - 5, 17); //linea de la mitad del recuadro
+        doc.line(46, 5, 46, doc.internal.pageSize.height - 269); // linea de separacion cuadros con imagen
+        doc.line(120, 5, 120, doc.internal.pageSize.height - 269); // linea de separacion parte media encabezado
+        doc.line(120, 11, doc.internal.pageSize.width - 5, 11); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(120, 23, doc.internal.pageSize.width - 5, 23); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(160, 5, 160, doc.internal.pageSize.height - 269); // linea de separacion recuadros parte izquierda
       }
       
 

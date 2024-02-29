@@ -117,7 +117,7 @@ export default {
       this.mantenimiento = "";
       this.vidaUtil = "";
       this.reposicion = "";
-      this.disposicionFinal = "f";
+      this.disposicionFinal = "j";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf')
@@ -132,80 +132,56 @@ export default {
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
+        
       }
 
-      // Función para dibujar la tabla
-      function drawTable(doc, items, startY) {
-        let margin = 10;
-        let cellWidth = (doc.internal.pageSize.width - margin * 2) / 10;
-
-        items.forEach((item, index) => {
-          let currentY = startY + index * 10;
-
-          doc.text(item.nombreEpp, margin, currentY);
-          doc.text(item.parteCuerpoProteger, margin + cellWidth, currentY);
-          doc.text(item.riesgoControlado, margin + cellWidth * 2, currentY);
-          doc.text(item.cargoAsociado, margin + cellWidth * 3, currentY);
-          doc.text(item.especificacionTecnica, margin + cellWidth * 4, currentY);
-          doc.text(item.uso, margin + cellWidth * 5, currentY);
-          doc.text(item.mantenimiento, margin + cellWidth * 6, currentY);
-          doc.text(item.vidaUtil, margin + cellWidth * 7, currentY);
-          doc.text(item.reposicion, margin + cellWidth * 8, currentY);
-          doc.text(item.disposicionFinal, margin + cellWidth * 9, currentY);
-        });
-
-        for (let i = 0; i <= items.length + 1; i++) {
-          doc.line(margin, startY + i * 10, margin + cellWidth * 10, startY + i * 10);
+      function drawHeader(doc) {
+        doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
+        doc.text('Direccion De Mantenimiento', 65, 13)
+        doc.text('Actas De Mantenimiento Electrico', 61, 23)
+        doc.text('NIT', 138, 10);
+        doc.text('123456789-0', 132, 15);
+        doc.text('Código de Factura', 128, 20); //el primer numero es para horiontal el segundo vertical
+        doc.text('ABC123', 135, 27)
+        const fechaActual = new Date().toLocaleDateString();
+        doc.text('Fecha', 177, 21)
+        doc.text(`${fechaActual}`, 175, 27);
+        const totalPages = doc.internal.getNumberOfPages();
+        doc.text('Paginas', 176, 9)
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.text(`${i} de ${totalPages}`, doc.internal.pageSize.width - 33, 15);
         }
-        for (let i = 0; i <= 10; i++) {
-          doc.line(margin + i * cellWidth, startY, margin + i * cellWidth, startY + (items.length + 1) * 10);
-        }
+        doc.line(5, 28, doc.internal.pageSize.width - 5, 28); //linea de separacion
+        doc.line(46, 17, doc.internal.pageSize.width - 5, 17); //linea de la mitad del recuadro
+        doc.line(46, 5, 46, doc.internal.pageSize.height - 269); // linea de separacion cuadros con imagen
+        doc.line(120, 5, 120, doc.internal.pageSize.height - 269); // linea de separacion parte media encabezado
+        doc.line(120, 11, doc.internal.pageSize.width - 5, 11); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(120, 23, doc.internal.pageSize.width - 5, 23); //linea de la mitad para separacion de recuadros izquierdos
+        doc.line(160, 5, 160, doc.internal.pageSize.height - 269); // linea de separacion recuadros parte izquierda
       }
-
-      // Función para generar páginas adicionales si la tabla excede el espacio de una página
-      function generatePDFPages(doc, itemsPerPage, items) {
-        let startY = 15;
-        let margin = 10;
-
-        let currentPageIndex = 0; // Índice de la página actual
-
-        // Dibujar los bordes de la primera página fuera del bucle while
-        drawBorders(doc);
-
-        while (currentPageIndex * itemsPerPage < items.length) {
-          if (currentPageIndex > 0) {
-            // Si no es la primera página, agregamos una nueva página y dibujamos los bordes
-            doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
-          }
-
-          let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
-
-          // Calcular la altura total que ocuparán las filas en la página
-          let totalHeight = itemsOnPage.length * 10;
-
-          // Verificar si el contenido supera el límite de altura de la página
-          if (startY + totalHeight > 270) {
-            // Si supera el límite, agregamos una nueva página
-            doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
-          }
-
-          // Dibujar las filas en la página actual
-          drawTable(doc, itemsOnPage, startY, margin);
-
-          // Actualizar el valor de startY para la próxima iteración
-          startY += totalHeight;
-
-          // Incrementar el índice de la página actual
-          currentPageIndex++;
-        }
-      }
-
+      
       drawBorders(doc);
-      generatePDFPages(doc, this.itemsPerPage, this.items);
+        this.items.forEach((item, index) => {
+      if (index > 0) {
+        doc.addPage();
+        drawBorders(doc);
+      }
+      drawHeader(doc);
+      
+      doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 60 + (index * 100));
+      doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
+      doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
+      doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
+      doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100));
+      doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
+      doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
+      doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
+      doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
+      doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
+      
+    });
+
 
       doc.save("informacion.pdf");
     }

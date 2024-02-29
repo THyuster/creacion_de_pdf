@@ -117,7 +117,7 @@ export default {
       this.mantenimiento = "";
       this.vidaUtil = "";
       this.reposicion = "";
-      this.disposicionFinal = "f";
+      this.disposicionFinal = "k";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf')
@@ -163,46 +163,53 @@ export default {
       }
 
       // Función para generar páginas adicionales si la tabla excede el espacio de una página
-      function generatePDFPages(doc, itemsPerPage, items) {
-        let startY = 15;
-        let margin = 10;
+function generatePDFPages(doc, itemsPerPage, items) {
+  let startY = 15;
+  let margin = 10;
 
-        let currentPageIndex = 0; // Índice de la página actual
+  let currentPageIndex = 0; // Índice de la página actual
+  let isFirstPage = true;
 
-        // Dibujar los bordes de la primera página fuera del bucle while
-        drawBorders(doc);
+  // Dibujar los bordes de la primera página
+  drawBorders(doc);
 
-        while (currentPageIndex * itemsPerPage < items.length) {
-          if (currentPageIndex > 0) {
-            // Si no es la primera página, agregamos una nueva página y dibujamos los bordes
-            doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
-          }
+  while (currentPageIndex * itemsPerPage < items.length) {
+    // Si no estamos en la primera página, agregamos una nueva página y dibujamos los bordes
+    if (!isFirstPage) {
+      doc.addPage();
+      startY = 15; // Restablecer el valor de startY para la nueva página
+      drawBorders(doc); // Dibujar los bordes en la nueva página
+    }
 
-          let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
+    let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
 
-          // Calcular la altura total que ocuparán las filas en la página
-          let totalHeight = itemsOnPage.length * 10;
+    // Calcular el espacio restante en la página actual
+    let spaceLeft = doc.internal.pageSize.height - startY - margin;
 
-          // Verificar si el contenido supera el límite de altura de la página
-          if (startY + totalHeight > 270) {
-            // Si supera el límite, agregamos una nueva página
-            doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
-          }
+    // Calcular la altura total que ocuparán las filas en la página
+    let totalHeight = itemsOnPage.length * 10;
 
-          // Dibujar las filas en la página actual
-          drawTable(doc, itemsOnPage, startY, margin);
+    // Verificar si hay suficiente espacio para dibujar todas las filas restantes
+    if (totalHeight > spaceLeft && !isFirstPage) {
+      // Si no hay suficiente espacio, agregar una nueva página
+      doc.addPage();
+      startY = 15; // Restablecer el valor de startY para la nueva página
+      drawBorders(doc); // Dibujar los bordes en la nueva página
+    }
 
-          // Actualizar el valor de startY para la próxima iteración
-          startY += totalHeight;
+    // Dibujar las filas en la página actual
+    drawTable(doc, itemsOnPage, startY, margin);
 
-          // Incrementar el índice de la página actual
-          currentPageIndex++;
-        }
-      }
+    // Actualizar el valor de startY para la próxima iteración
+    startY += totalHeight;
+
+    // Incrementar el índice de la página actual
+    currentPageIndex++;
+
+    // Indicar que ya no estamos en la primera página
+    isFirstPage = false;
+  }
+}
 
       drawBorders(doc);
       generatePDFPages(doc, this.itemsPerPage, this.items);

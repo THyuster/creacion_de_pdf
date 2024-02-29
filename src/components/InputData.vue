@@ -72,9 +72,9 @@
     </table>
   </div>
 </template>
-
 <script>
 import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg'
+import 'jspdf-autotable';
 export default {
   data() {
     return {
@@ -121,29 +121,31 @@ export default {
       this.disposicionFinal = "f";
     },
     async generarPDF() {
+      
       const jsPDF = await import('jspdf')
+      const pageSize = { width: 216, height: 279};
       const doc = new jsPDF.default();
+      // const doc = new jsPDF({ format: [pageSize.width, pageSize.height] });
 
       doc.setDrawColor(0); 
       doc.setLineWidth(0.2); 
       doc.setFontSize(8);
       
-
       // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
-        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
-        
+        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);       
       }
+
       function drawHeader(doc) {
         doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
         doc.text('NIT', 138, 10);
         doc.text('123456789-0', 132, 15);
-        doc.text('Código de Factura', 128, 20); //el primer numero es para horiontal el segundo vertical
+        doc.text('Código de Factura', 128, 20);
         doc.text('ABC123', 135, 27)
         const fechaActual = new Date().toLocaleDateString();
         doc.text('Fecha', 177, 21)
@@ -154,84 +156,88 @@ export default {
           doc.setPage(i);
           doc.text(`${i} de ${totalPages}`, doc.internal.pageSize.width - 33, 15);
         }
-        doc.line(5, 28, doc.internal.pageSize.width - 5, 28); //linea de separacion
-        doc.line(46, 17, doc.internal.pageSize.width - 5, 17); //linea de la mitad del recuadro
-        doc.line(46, 5, 46, doc.internal.pageSize.height - 269); // linea de separacion cuadros con imagen
-        doc.line(120, 5, 120, doc.internal.pageSize.height - 269); // linea de separacion parte media encabezado
-        doc.line(120, 11, doc.internal.pageSize.width - 5, 11); //linea de la mitad para separacion de recuadros izquierdos
-        doc.line(120, 23, doc.internal.pageSize.width - 5, 23); //linea de la mitad para separacion de recuadros izquierdos
-        doc.line(160, 5, 160, doc.internal.pageSize.height - 269); // linea de separacion recuadros parte izquierda
+        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+        doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
+        doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
+        doc.line(120, 5, 120, doc.internal.pageSize.height - 269);
+        doc.line(120, 11, doc.internal.pageSize.width - 5, 11);
+        doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
+        doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
 
-      // Función para dibujar la tabla
-      function drawTable(doc, items, startY) {
-        let margin = 10;
-        let cellWidth = (doc.internal.pageSize.width - margin * 2) / 10;
+      let startY = 50;
+      let remainingData = [
+        ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final'],
+        ...this.items.map(item => [
+          item.nombreEpp,
+          item.parteCuerpoProteger,
+          item.riesgoControlado,
+          item.cargoAsociado,
+          item.especificacionTecnica,
+          item.uso,
+          item.mantenimiento,
+          item.vidaUtil,
+          item.reposicion,
+          item.disposicionFinal
+        ])
+      ];
 
-        items.forEach((item, index) => {
-          let currentY = startY + index * 10;
+      while (remainingData.length > 0) {
+        const availableSpace = pageSize.height - startY; 
+        const maxRows = Math.floor(availableSpace / 20); 
+        const rowsForPage = remainingData.slice(0, maxRows);
 
-          doc.text(item.nombreEpp, margin, currentY);
-          doc.text(item.parteCuerpoProteger, margin + cellWidth, currentY);
-          doc.text(item.riesgoControlado, margin + cellWidth * 2, currentY);
-          doc.text(item.cargoAsociado, margin + cellWidth * 3, currentY);
-          doc.text(item.especificacionTecnica, margin + cellWidth * 4, currentY);
-          doc.text(item.uso, margin + cellWidth * 5, currentY);
-          doc.text(item.mantenimiento, margin + cellWidth * 6, currentY);
-          doc.text(item.vidaUtil, margin + cellWidth * 7, currentY);
-          doc.text(item.reposicion, margin + cellWidth * 8, currentY);
-          doc.text(item.disposicionFinal, margin + cellWidth * 9, currentY);
+        doc.autoTable({
+          startY: startY,
+          head: [remainingData[0]],
+          setFontSize: (8),
+          body: rowsForPage,
+          theme: 'grid'
         });
 
-        for (let i = 0; i <= items.length + 1; i++) {
-          doc.line(margin, startY + i * 10, margin + cellWidth * 10, startY + i * 10);
-        }
-        for (let i = 0; i <= 10; i++) {
-          doc.line(margin + i * cellWidth, startY, margin + i * cellWidth, startY + (items.length + 1) * 10);
+        remainingData = remainingData.slice(maxRows);
+
+        if (remainingData.length > 0) {
+          doc.addPage();
+          startY = 10;
         }
       }
 
       // Función para generar páginas adicionales si la tabla excede el espacio de una página
       function generatePDFPages(doc, itemsPerPage, items) {
-        let startY = 32;
+        if (items.length === 0) return;
+
+        let startY = 48;
         let margin = 10;
+        let currentPageIndex = 0;
+        let isFirstPage = true;
 
-        let currentPageIndex = 0; // Índice de la página actual
-
-        // Dibujar los bordes de la primera página fuera del bucle while
         drawBorders(doc);
 
         while (currentPageIndex * itemsPerPage < items.length) {
-          if (currentPageIndex > 0) {
-            // Si no es la primera página, agregamos una nueva página y dibujamos los bordes
+          if (!isFirstPage) {
             doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
+            startY = 15;
+            drawBorders(doc);
           }
 
           let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
 
-          // Calcular la altura total que ocuparán las filas en la página
+          let spaceLeft = doc.internal.pageSize.height - startY - margin;
           let totalHeight = itemsOnPage.length * 10;
 
-          // Verificar si el contenido supera el límite de altura de la página
-          if (startY + totalHeight > 270) {
-            // Si supera el límite, agregamos una nueva página
+          if (totalHeight > spaceLeft && !isFirstPage) {
             doc.addPage();
-            startY = 15; // Restablecer el valor de startY para la nueva página
-            drawBorders(doc); // Dibujar los bordes en la nueva página
+            startY = 15;
+            drawBorders(doc);
           }
 
-          // Dibujar las filas en la página actual
-          drawTable(doc, itemsOnPage, startY, margin);
-
-          // Actualizar el valor de startY para la próxima iteración
           startY += totalHeight;
-
-          // Incrementar el índice de la página actual
           currentPageIndex++;
+          isFirstPage = false;
         }
       }
+
       drawHeader(doc);
       drawBorders(doc);
       generatePDFPages(doc, this.itemsPerPage, this.items);

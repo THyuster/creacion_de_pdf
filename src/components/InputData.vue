@@ -87,7 +87,7 @@ export default {
       this.mantenimiento = "";
       this.vidaUtil = "";
       this.reposicion = "";
-      this.disposicionFinal = "";
+      this.disposicionFinal = "j";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -99,9 +99,10 @@ export default {
 
       function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
-        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);  //lineas de los bordes 
+        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
+        
       }
 
       function drawHeader(doc) {
@@ -130,22 +131,26 @@ export default {
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269); // linea de separacion recuadros parte izquierda
       }
       
-
       drawBorders(doc);
+        this.items.forEach((item, index) => {
+      if (index > 0) {
+        doc.addPage();
+        drawBorders(doc);
+      }
       drawHeader(doc);
+      
+      doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 60 + (index * 100));
+      doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
+      doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
+      doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
+      doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100));
+      doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
+      doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
+      doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
+      doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
+      doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
+    });
 
-      this.items.forEach((item, index) => {
-        doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 60 + (index * 100));
-        doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
-        doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
-        doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
-        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100)); //titulos y datos en el pdf
-        doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
-        doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
-        doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
-        doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
-        doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
-      });
 
       doc.save("informacion.pdf");
     }

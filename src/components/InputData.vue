@@ -59,6 +59,8 @@ export default {
       reposicion: "",
       disposicionFinal: "",
       items: [],
+      items: [],
+      items: [],
     };
   },
   methods: {

@@ -40,11 +40,40 @@
     </div>
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre del EPP</th>
+          <th>Parte del Cuerpo a Proteger</th>
+          <th>Riesgo Controlado</th>
+          <th>Cargo Asociado</th>
+          <th>Especificación Técnica</th>
+          <th>Uso</th>
+          <th>Mantenimiento</th>
+          <th>Vida Útil</th>
+          <th>Reposición</th>
+          <th>Disposición Final</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in items" :key="index">
+          <td>{{ item.nombreEpp }}</td>
+          <td>{{ item.parteCuerpoProteger }}</td>
+          <td>{{ item.riesgoControlado }}</td>
+          <td>{{ item.cargoAsociado }}</td>
+          <td>{{ item.especificacionTecnica }}</td>
+          <td>{{ item.uso }}</td>
+          <td>{{ item.mantenimiento }}</td>
+          <td>{{ item.vidaUtil }}</td>
+          <td>{{ item.reposicion }}</td>
+          <td>{{ item.disposicionFinal }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script>
-import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg'; 
 export default {
   data() {
     return {
@@ -58,8 +87,6 @@ export default {
       vidaUtil: "",
       reposicion: "",
       disposicionFinal: "",
-      items: [],
-      items: [],
       items: [],
     };
   },
@@ -92,10 +119,9 @@ export default {
       this.disposicionFinal = "";
     },
     async generarPDF() {
-      const jsPDF = await import('jspdf');
+      const jsPDF = await import('jspdf')
       const doc = new jsPDF.default();
 
-      doc.setFontSize(8);
       doc.setDrawColor(0); 
       doc.setLineWidth(0.2); 
 
@@ -106,36 +132,36 @@ export default {
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
       }
 
-      function drawHeader(doc) {
-        doc.addImage(imagenData, 'JPEG', 8, 8, 40, 20);
-        doc.text('NIT: 123456789-0', 130, 10);
-        doc.text('Código de Factura: ABC123', 150, 30); //el primer numero es para horiontal el segundo vertical
-        const fechaActual = new Date().toLocaleDateString();
-        doc.text(`Fecha: ${fechaActual}`, 160, 20);
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 35, 10);
+      function drawTable(doc, items) {
+        let startY = 28;
+        let margin = 10;
+        let cellWidth = (doc.internal.pageSize.width - margin * 2) / 10;
+
+        items.forEach((item, index) => {
+          let currentY = startY + index * 10;
+
+          doc.text(item.nombreEpp, margin, currentY);
+          doc.text(item.parteCuerpoProteger, margin + cellWidth, currentY);
+          doc.text(item.riesgoControlado, margin + cellWidth * 2, currentY);
+          doc.text(item.cargoAsociado, margin + cellWidth * 3, currentY);
+          doc.text(item.especificacionTecnica, margin + cellWidth * 4, currentY);
+          doc.text(item.uso, margin + cellWidth * 5, currentY);
+          doc.text(item.mantenimiento, margin + cellWidth * 6, currentY);
+          doc.text(item.vidaUtil, margin + cellWidth * 7, currentY);
+          doc.text(item.reposicion, margin + cellWidth * 8, currentY);
+          doc.text(item.disposicionFinal, margin + cellWidth * 9, currentY);
+        });
+
+        for (let i = 0; i <= items.length + 1; i++) {
+          doc.line(margin, startY + i * 10, margin + cellWidth * 10, startY + i * 10);
         }
-        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+        for (let i = 0; i <= 10; i++) {
+          doc.line(margin + i * cellWidth, startY, margin + i * cellWidth, startY + (items.length + 1) * 10);
+        }
       }
-      
 
       drawBorders(doc);
-      drawHeader(doc);
-
-      this.items.forEach((item, index) => {
-        doc.text(`Nombre del EPP: ${item.nombreEpp}`, 10, 60 + (index * 100));
-        doc.text(`Parte del Cuerpo a Proteger: ${item.parteCuerpoProteger}`, 10, 70 + (index * 100));
-        doc.text(`Riesgo Controlado: ${item.riesgoControlado}`, 10, 80 + (index * 100));
-        doc.text(`Cargo Asociado: ${item.cargoAsociado}`, 10, 90 + (index * 100));
-        doc.text(`Especificacion Tecnica: ${item.especificacionTecnica}`, 10, 100 + (index * 100));
-        doc.text(`Uso: ${item.uso}`, 10, 110 + (index * 100));
-        doc.text(`Mantenimiento: ${item.mantenimiento}`, 10, 120 + (index * 100));
-        doc.text(`Vida Util: ${item.vidaUtil}`, 10, 130 + (index * 100));
-        doc.text(`Reposicion: ${item.reposicion}`, 10, 140 + (index * 100));
-        doc.text(`Disposicion Final: ${item.disposicionFinal}`, 10, 150 + (index * 100));
-      });
+      drawTable(doc, this.items);
 
       doc.save("informacion.pdf");
     }
@@ -144,4 +170,17 @@ export default {
 </script>
 
 <style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
 </style>

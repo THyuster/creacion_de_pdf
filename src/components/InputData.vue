@@ -138,6 +138,16 @@ export default {
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);       
       }
+      function generarCodigoFactura() {
+        const caracteres = '1234567890';
+        const longitud = 6;
+        let codigo = '';
+        for (let i = 0; i < longitud; i++) {
+          const indice = Math.floor(Math.random() * caracteres.length);
+          codigo += caracteres.charAt(indice);
+        }
+        return codigo;
+      }
 
       function drawHeader(doc) {
         doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
@@ -146,7 +156,8 @@ export default {
         doc.text('NIT', 138, 10);
         doc.text('123456789-0', 132, 15);
         doc.text('Código de Factura', 128, 20);
-        doc.text('ABC123', 135, 27)
+        const codigoFactura = generarCodigoFactura(); // Generar código de factura
+        doc.text(codigoFactura, 135, 27);
         const fechaActual = new Date().toLocaleDateString();
         doc.text('Fecha', 177, 21)
         doc.text(`${fechaActual}`, 175, 27);
@@ -156,6 +167,7 @@ export default {
           doc.setPage(i);
           doc.text(`${i} de ${totalPages}`, doc.internal.pageSize.width - 33, 15);
         }
+        // doc.setPage(1);
         doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
         doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
         doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
@@ -164,7 +176,8 @@ export default {
         doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
-
+      drawHeader(doc);
+      drawBorders(doc);
       let startY = 30;
       let remainingData = [
         ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final'],
@@ -186,7 +199,8 @@ export default {
         const availableSpace = pageSize.height - startY; 
         const maxRows = Math.floor(availableSpace / 20); 
         const rowsForPage = remainingData.slice(0, maxRows);
-
+        doc.addPage();
+        drawHeader(doc);
         doc.autoTable({
           startY: startY,
           head: [remainingData[0]],
@@ -195,12 +209,14 @@ export default {
           theme: 'grid',
           columnWidth: [40, 40, 30, 40, 40, 20, 30, 20, 30, 30],
         });
-
+        drawBorders(doc);
         remainingData = remainingData.slice(maxRows);
 
         if (remainingData.length > 0) {
           doc.addPage();
-          startY = 10;
+          drawHeader(doc);
+          drawBorders(doc)
+          startY = 30;
         }
       }
 
@@ -211,15 +227,17 @@ export default {
         let startY = 48;
         let margin = 10;
         let currentPageIndex = 0;
-        let isFirstPage = true;
+        let isFirstPage = false;
 
-        drawBorders(doc);
+        drawHeader(doc);
+        drawBorders(doc)
 
         while (currentPageIndex * itemsPerPage < items.length) {
           if (!isFirstPage) {
             doc.addPage();
-            startY = 15;
             drawBorders(doc);
+            drawHeader(doc);
+            startY = 32;
           }
 
           let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
@@ -229,8 +247,9 @@ export default {
 
           if (totalHeight > spaceLeft && !isFirstPage) {
             doc.addPage();
-            startY = 15;
             drawBorders(doc);
+            drawHeader(doc);
+            startY = 32;
           }
 
           startY += totalHeight;
@@ -239,8 +258,8 @@ export default {
         }
       }
 
-      drawHeader(doc);
       drawBorders(doc);
+      drawBorders(doc)
       generatePDFPages(doc, this.itemsPerPage, this.items);
 
       doc.save("informacion.pdf");

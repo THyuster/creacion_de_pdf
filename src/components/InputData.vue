@@ -73,21 +73,22 @@
   </div>
 </template>
 <script>
-import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg'
+import imagenData from '@/assets/LB-WORKS-NSX-NA113.jpg';
 import 'jspdf-autotable';
+
 export default {
   data() {
     return {
-      nombreEpp: "",
-      parteCuerpoProteger: "",
-      riesgoControlado: "",
-      cargoAsociado: "",
-      especificacionTecnica: "",
-      uso: "",
-      mantenimiento: "",
-      vidaUtil: "",
-      reposicion: "",
-      disposicionFinal: "",
+      nombreEpp: "elbo",
+      parteCuerpoProteger: "fe",
+      riesgoControlado: "feW",
+      cargoAsociado: "EFW",
+      especificacionTecnica: "gjg",
+      uso: "ghd",
+      mantenimiento: "fah",
+      vidaUtil: "fhd",
+      reposicion: "fdhd",
+      disposicionFinal: "g",
       items: [],
       itemsPerPage: 30,
     };
@@ -109,36 +110,34 @@ export default {
       this.limpiarCampos();
     },
     limpiarCampos() {
-      this.nombreEpp = "";
-      this.parteCuerpoProteger = "";
-      this.riesgoControlado = "";
-      this.cargoAsociado = "";
-      this.especificacionTecnica = "";
-      this.uso = "";
-      this.mantenimiento = "";
-      this.vidaUtil = "";
-      this.reposicion = "";
+      this.nombreEpp = "sdfh";
+      this.parteCuerpoProteger = "sfhdd";
+      this.riesgoControlado = "sdfh";
+      this.cargoAsociado = "shdfd";
+      this.especificacionTecnica = "sfhfd";
+      this.uso = "hdsf";
+      this.mantenimiento = "fdhsd";
+      this.vidaUtil = "fhdf";
+      this.reposicion = "gfh";
       this.disposicionFinal = "f";
     },
     async generarPDF() {
-      
-      const jsPDF = await import('jspdf')
-      const pageSize = { width: 216, height: 279};
+      const jsPDF = await import('jspdf');
       const doc = new jsPDF.default();
-      // const doc = new jsPDF({ format: [pageSize.width, pageSize.height] });
 
-      doc.setDrawColor(0); 
-      doc.setLineWidth(0.2); 
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.2);
       doc.setFontSize(8);
-      
+
       // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
-        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);       
+        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
       }
 
+      // Dibujar el encabezado
       function drawHeader(doc) {
         doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
@@ -165,10 +164,14 @@ export default {
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
 
-      let startY = 50;
-      let remainingData = [
-        ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final'],
-        ...this.items.map(item => [
+      // Dibujar el encabezado y los márgenes en la primera página
+      drawBorders(doc);
+      drawHeader(doc);
+
+      doc.autoTable({
+        startY: 28.5,
+        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
+        body: this.items.map(item => [
           item.nombreEpp,
           item.parteCuerpoProteger,
           item.riesgoControlado,
@@ -179,79 +182,32 @@ export default {
           item.vidaUtil,
           item.reposicion,
           item.disposicionFinal
-        ])
-      ];
+        ]), // Datos de la tabla
+        theme: 'grid', // Estilo de la tabla
+        margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
+        styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+        headerStyles: {
+          textColor: '#000',
+          fillColor: [200, 200, 200], // Color gris (F4F4F4)
+        },
+        columnWidth: 'auto' // Anchura automática para la primera columna
+      });
 
-      while (remainingData.length > 0) {
-        const availableSpace = pageSize.height - startY; 
-        const maxRows = Math.floor(availableSpace / 20); 
-        const rowsForPage = remainingData.slice(0, maxRows);
-
-        doc.autoTable({
-          startY: startY,
-          head: [remainingData[0]],
-          setFontSize: (8),
-          body: rowsForPage,
-          theme: 'grid'
-        });
-
-        remainingData = remainingData.slice(maxRows);
-
-        if (remainingData.length > 0) {
-          doc.addPage();
-          startY = 10;
-        }
-      }
-
-      // Función para generar páginas adicionales si la tabla excede el espacio de una página
-      function generatePDFPages(doc, itemsPerPage, items) {
-        if (items.length === 0) return;
-
-        let startY = 48;
-        let margin = 10;
-        let currentPageIndex = 0;
-        let isFirstPage = true;
-
-        drawBorders(doc);
-
-        while (currentPageIndex * itemsPerPage < items.length) {
-          if (!isFirstPage) {
-            doc.addPage();
-            startY = 15;
-            drawBorders(doc);
-          }
-
-          let itemsOnPage = items.slice(currentPageIndex * itemsPerPage, (currentPageIndex + 1) * itemsPerPage);
-
-          let spaceLeft = doc.internal.pageSize.height - startY - margin;
-          let totalHeight = itemsOnPage.length * 10;
-
-          if (totalHeight > spaceLeft && !isFirstPage) {
-            doc.addPage();
-            startY = 15;
-            drawBorders(doc);
-          }
-
-          startY += totalHeight;
-          currentPageIndex++;
-          isFirstPage = false;
-        }
-      }
-
+      // Dibujar el encabezado y los márgenes en la segunda página
       drawHeader(doc);
       drawBorders(doc);
-      generatePDFPages(doc, this.itemsPerPage, this.items);
 
       doc.save("informacion.pdf");
     }
   }
-};
+}
 </script>
 
 <style>
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 2%;
 }
 
 th, td {

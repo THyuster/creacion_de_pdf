@@ -143,7 +143,7 @@ export default {
       UPM: 'ss',
       activos_fijos: 'ss',
       marca: '',
-      mantenimiento_realizado: 'ss',
+      mantenimiento_realizado: '',
       horometro: 'ss',
       fecha: 'ss',
       items: [],
@@ -185,7 +185,7 @@ export default {
       this.UPM = 'ss';
       this.activos_fijos = 'ss';
       this.marca = "ss";
-      this.mantenimiento_realizado = 'ss';
+      this.mantenimiento_realizado = '';
       this.horometro = 'ss';
       this.fecha = 'ss';
     },
@@ -253,17 +253,29 @@ export default {
         return serial;
       }
 
-  function drawEncabezado(doc){
-    doc.text("UPM:", 120, 50 );
-    doc.text("Activo Fija:", 120 , 60 );
-    doc.text ("Marca:", 120, 70 );
-    doc.text("Serial: ", 120, 80 )
-    const codigoSerial = generarSerial();
-    doc.text(codigoSerial, 120, 90 );
-    doc.text("Mantenimiento Realizado", 120, 100 )
-    doc.text("Horometro", 120, 110 )
-    doc.text("Fecha", 120, 120 )
-  }
+      const mantenimiento_realizado = this.mantenimiento_realizado;
+
+      drawEncabezado(doc, mantenimiento_realizado);
+      
+      function drawEncabezado(doc, mantenimiento_realizado){
+        doc.text("UPM:", 8, 33);
+        doc.text("Activo Fija:", 30, 33);
+        doc.text("Marca:", 122, 33);
+        doc.text("Serial: ", 8, 40);
+        const codigoSerial = generarSerial();
+        doc.text(codigoSerial, 180, 40);
+        doc.text("Horometro", 120, 110);
+        doc.text("Fecha", 120, 120);
+        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
+        doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 120, 100);
+        doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
+        doc.line(26, 28, 26, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
+        doc.line(46, 70, doc.internal.pageSize.width - 5, 70); // linea de sepracion de mantenimiento realizado
+        doc.line(46, 90, doc.internal.pageSize.width - 5, 90); // separacion de titulo 1
+        doc.line(46, 110, doc.internal.pageSize.width - 5, 110); // separacion de titulo 2
+      }
 
   // Dibujar el encabezado y los márgenes en la primera página
   drawBorders(doc);
@@ -274,7 +286,7 @@ export default {
   const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
   doc.autoTable({
-    startY: 50,
+    startY: 80,
     head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
     body: this.items.map(item => [
       item.nombreEpp,

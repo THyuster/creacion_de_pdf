@@ -146,13 +146,12 @@ export default {
       realizadoEquipo: '',
       cantidadEquipo: '',
       referenciaEquipo: '',
-      items: [],
       itemsEquipos: [],
       itemsPerPage: 30,
       UPM: 'ss',
       activos_fijos: 'ss',
       marca: '',
-      mantenimiento_realizado: 'ss',
+      mantenimiento_realizado: '',
       horometro: 'ss',
       fecha: 'ss',
       items: [],
@@ -179,6 +178,22 @@ export default {
       this.limpiarCampos();
     },
     limpiarCampos() {
+      this.nombreEpp = "";
+      this.parteCuerpoProteger = "";
+      this.riesgoControlado = "";
+      this.cargoAsociado = "";
+      this.especificacionTecnica = "";
+      this.uso = "";
+      this.mantenimiento = "";
+      this.vidaUtil = "";
+      this.reposicion = "";
+      this.disposicionFinal = "";
+      this.UPM = 'ss';
+      this.activos_fijos = 'ss';
+      this.marca = "ss";
+      this.mantenimiento_realizado = '';
+      this.horometro = 'ss';
+      this.fecha = 'ss';
       this.nombreEpp = "sdfh";
       this.parteCuerpoProteger = "sfhdd";
       this.riesgoControlado = "sdfh";
@@ -218,32 +233,66 @@ export default {
         return codigo;
       }
 
-      // Dibujar el encabezado
-      function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 6, 40, 22);
-        doc.text('Direccion De Mantenimiento', 65, 13)
-        doc.text('Actas De Mantenimiento Electrico', 61, 23)
-        doc.text('NIT', 138, 9);
-        doc.text('123456789-0', 132, 15);
-        doc.text('Código de Factura', 130, 21);
-        const codigoFactura = generarCodigoFactura(); // Generar código de factura
-        doc.text(codigoFactura, 135, 27);// doc.setPage(1);
-        const fechaActual = new Date().toLocaleDateString();
-        doc.text('Fecha', 177, 21)
-        doc.text(`${fechaActual}`, 175, 27);
-        const totalPages = doc.internal.getNumberOfPages();
-        doc.text('Página', 176, 9)
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15);
+  // Dibujar el encabezado
+  function drawHeader(doc) {
+    doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
+    doc.text('Direccion De Mantenimiento', 65, 13)
+    doc.text('Actas De Mantenimiento Electrico', 61, 23)
+    doc.text('NIT', 138, 10);
+    doc.text('123456789-0', 132, 15);
+    doc.text("Codigo Factura", 130, 21);
+    const codigoFactura = generarCodigoFactura(); // Generar código de factura
+    doc.text(codigoFactura, 135, 27);// doc.setPage(1);
+    const fechaActual = new Date().toLocaleDateString();
+    doc.text('Fecha', 177, 21)
+    doc.text(`${fechaActual}`, 175, 27);
+    const totalPages = doc.internal.getNumberOfPages();
+    doc.text('Paginas', 176, 9)
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.text(`${i}`,  doc.internal.pageSize.width - 30, 15);
+    }
+    doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+    doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
+    doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
+    doc.line(120, 5, 120, doc.internal.pageSize.height - 269);
+    doc.line(120, 11, doc.internal.pageSize.width - 5, 11);
+    doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
+    doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
+  }
+  function generarSerial() {
+        const caracteres = 'ABC1234567890';
+        const longitud = 6;
+        let serial = '';
+        for (let i = 0; i < longitud; i++) {
+          const indice = Math.floor(Math.random() * caracteres.length);
+          serial += caracteres.charAt(indice);
         }
-        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
-        doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
-        doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
-        doc.line(120, 5, 120, doc.internal.pageSize.height - 269);
-        doc.line(120, 11, doc.internal.pageSize.width - 5, 11);
-        doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
-        doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
+        return serial;
+      }
+
+      const mantenimiento_realizado = this.mantenimiento_realizado;
+
+      drawEncabezado(doc, mantenimiento_realizado);
+      
+      function drawEncabezado(doc, mantenimiento_realizado){
+        doc.text("UPM:", 8, 33);
+        doc.text("Activo Fija:", 30, 33);
+        doc.text("Marca:", 122, 33);
+        doc.text("Serial: ", 8, 40);
+        const codigoSerial = generarSerial();
+        doc.text(codigoSerial, 180, 40);
+        doc.text("Horometro", 120, 110);
+        doc.text("Fecha", 120, 120);
+        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
+        doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 120, 100);
+        doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
+        doc.line(26, 28, 26, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
+        doc.line(46, 70, doc.internal.pageSize.width - 5, 70); // linea de sepracion de mantenimiento realizado
+        doc.line(46, 90, doc.internal.pageSize.width - 5, 90); // separacion de titulo 1
+        doc.line(46, 110, doc.internal.pageSize.width - 5, 110); // separacion de titulo 2
       }
 
       // Dibujar el encabezado y los márgenes en la primera página
@@ -257,6 +306,42 @@ export default {
       const positionFirstTable = 28.5;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
+  // doc.autoTable({
+  //   startY: 80,
+  //   head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
+  //   body: this.items.map(item => [
+  //     item.nombreEpp,
+  //     item.parteCuerpoProteger,
+  //     item.riesgoControlado,
+  //     item.cargoAsociado,
+  //     item.especificacionTecnica,
+  //     item.uso,
+  //     item.mantenimiento,
+  //     item.vidaUtil,
+  //     item.reposicion,
+  //     item.disposicionFinal
+  //   ]), // Datos de la tabla
+  //   theme: 'grid', // Estilo de la tabla
+  //   margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
+  //   styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+  //   headerStyles: {
+  //     textColor: '#000',
+  //     fillColor: [200, 200, 200], // Color gris (F4F4F4)
+  //   },
+  //   columnWidth: 'auto', // Anchura automática para la primera columna
+  //   didDrawPage: function () {
+  //     // Verificar si hay más de una página adicional
+  //     const totalPages = doc.internal.getNumberOfPages();
+  //     if (totalPages > firstPagePosition) {
+  //       // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
+  //       for (let i = firstPagePosition + 1; i <= totalPages; i++) {
+  //         doc.setPage(i);
+  //         drawHeader(doc);
+  //         drawBorders(doc);
+  //       }
+  //     }
+  //   }
+  // });
       doc.autoTable({
         startY: positionFirstTable,
         head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla

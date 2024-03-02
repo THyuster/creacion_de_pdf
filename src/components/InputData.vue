@@ -303,45 +303,46 @@ export default {
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
       // Calcular la posición de inicio de la segunda tabla
-      const positionFirstTable = 28.5;
+      // const positionFirstTable = 28.5;
+      const positionFirstTable = 80;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
-  // doc.autoTable({
-  //   startY: 80,
-  //   head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
-  //   body: this.items.map(item => [
-  //     item.nombreEpp,
-  //     item.parteCuerpoProteger,
-  //     item.riesgoControlado,
-  //     item.cargoAsociado,
-  //     item.especificacionTecnica,
-  //     item.uso,
-  //     item.mantenimiento,
-  //     item.vidaUtil,
-  //     item.reposicion,
-  //     item.disposicionFinal
-  //   ]), // Datos de la tabla
-  //   theme: 'grid', // Estilo de la tabla
-  //   margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
-  //   styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-  //   headerStyles: {
-  //     textColor: '#000',
-  //     fillColor: [200, 200, 200], // Color gris (F4F4F4)
-  //   },
-  //   columnWidth: 'auto', // Anchura automática para la primera columna
-  //   didDrawPage: function () {
-  //     // Verificar si hay más de una página adicional
-  //     const totalPages = doc.internal.getNumberOfPages();
-  //     if (totalPages > firstPagePosition) {
-  //       // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
-  //       for (let i = firstPagePosition + 1; i <= totalPages; i++) {
-  //         doc.setPage(i);
-  //         drawHeader(doc);
-  //         drawBorders(doc);
-  //       }
-  //     }
-  //   }
-  // });
+  doc.autoTable({
+    startY: 80,
+    head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
+    body: this.items.map(item => [
+      item.nombreEpp,
+      item.parteCuerpoProteger,
+      item.riesgoControlado,
+      item.cargoAsociado,
+      item.especificacionTecnica,
+      item.uso,
+      item.mantenimiento,
+      item.vidaUtil,
+      item.reposicion,
+      item.disposicionFinal
+    ]), // Datos de la tabla
+    theme: 'grid', // Estilo de la tabla
+    margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
+    styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+    headerStyles: {
+      textColor: '#000',
+      fillColor: [200, 200, 200], // Color gris (F4F4F4)
+    },
+    columnWidth: 'auto', // Anchura automática para la primera columna
+    didDrawPage: function () {
+      // Verificar si hay más de una página adicional
+      const totalPages = doc.internal.getNumberOfPages();
+      if (totalPages > firstPagePosition) {
+        // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
+        for (let i = firstPagePosition + 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          drawHeader(doc);
+          drawBorders(doc);
+        }
+      }
+    }
+  });
       doc.autoTable({
         startY: positionFirstTable,
         head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla

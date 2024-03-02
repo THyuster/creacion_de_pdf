@@ -62,11 +62,44 @@
         <input type="text" id="referenciaEquipo" name="referenciaEquipo" v-model="referenciaEquipo" placeholder="referencia">
       </div>
     </div>
+    <div class="contenedor_2">
+      <div>
+        <label for="UPM" id="upm">UPM:  </label>
+        <input v-model="UPM" placeholder=" UPM: " />
+      </div>
+    <div>
+      <label for="Marca" id="upm">Marca: </label>
+      <input v-model="marca" placeholder=" Marca:"/>
+    </div>
+    <div>
+      <label for="activos_fijos" id="activos_fijos">Activos Fijos:</label>
+      <input v-model="activos_fijos" placeholder="Activos Fijos: " />
+    </div>
+    <div>
+        <label class="checkbox-label">Mantenimiento Realizado:</label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Preventivo">
+          Preventivo
+        </label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Correctivo">
+          Correctivo
+        </label>
+      </div>
+    <div>
+      <label for="horometro" id="Horometro">Horometro </label>
+      <input v-model="horometro" placeholder="Horometro " />
+    </div>
+    <div>
+      <label for="fecha" id="fecha">Fecha</label>
+      <input type="date" v-model="fecha" placeholder="Fecha " />
+    </div>
   </div>
   <div class="contenedor">
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
   </div>
+</div>
   <div>
     <!-- Primera tabla -->
     <table>
@@ -82,6 +115,12 @@
           <th>Vida Útil</th>
           <th>Reposición</th>
           <th>Disposición Final</th>
+          <th>UPM</th>
+          <th>Activos Fijos</th>
+          <th>Marca</th>
+          <th>Mantenimiento Realizado</th>
+          <th>Horometro</th>
+          <th>Fecha</th>
         </tr>
       </thead>
       <tbody>
@@ -96,6 +135,12 @@
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
           <td>{{ item.disposicionFinal }}</td>
+          <td>{{ item.UPM }}</td>
+          <td>{{ item.activos_fijos }}</td>
+          <td>{{ item.marca }}</td>
+          <td>{{ item.mantenimiento_realizado }}</td>
+          <td>{{ item.horometro }}</td>
+          <td>{{ item.fecha }}</td>
         </tr>
       </tbody>
     </table>
@@ -174,6 +219,11 @@ export default {
         realizadoEquipo: this.realizadoEquipo,
         cantidadEquipo: this.cantidadEquipo,
         referenciaEquipo: this.referenciaEquipo,
+        UPM: this.UPM,
+        activos_fijos: this.activos_fijos,
+        marca: this.marca,
+        horometro: this.horometro,
+        fecha: this.fecha,
       });      
       this.limpiarCampos();
     },
@@ -205,6 +255,13 @@ export default {
       this.reposicion = "gfh";
       this.disposicionFinal = "f";
       this.realizadoEquipo = "";
+      this.UPM = 'ss';
+      this.activos_fijos = 'ss';
+      this.marca = "ss";
+      this.mantenimiento_realizado = '';
+      this.horometro = 'ss';
+      this.fecha = 'ss';
+
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -294,7 +351,6 @@ export default {
         doc.line(46, 90, doc.internal.pageSize.width - 5, 90); // separacion de titulo 1
         doc.line(46, 110, doc.internal.pageSize.width - 5, 110); // separacion de titulo 2
       }
-
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);

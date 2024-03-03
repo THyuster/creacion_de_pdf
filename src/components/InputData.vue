@@ -222,10 +222,12 @@ export default {
         UPM: this.UPM,
         activos_fijos: this.activos_fijos,
         marca: this.marca,
-        hora: this.horometro,
+        mantenimiento_realizado: this.mantenimiento_realizado,
+        hora: this.hora,
         fecha: this.fecha,
       });      
       this.limpiarCampos();
+
     },
     limpiarCampos() {
       this.nombreEpp = "";
@@ -249,6 +251,14 @@ export default {
     async generarPDF() {
       const jsPDF = await import('jspdf');
       const doc = new jsPDF.default();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Calcular el centro de la página
+      const centerX = pageWidth / 2;
+      const centerY = pageHeight / 2;
+      console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
 
       doc.setDrawColor(0);
       doc.setLineWidth(0.2);
@@ -330,6 +340,8 @@ export default {
         doc.text(`${fecha}`, 75, 46);
         const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
+        doc.text("Actividades Realizados e Insumos Utilizados", 75, 53);
+        doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
         doc.line(26, 28, 26, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
@@ -337,8 +349,8 @@ export default {
         doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado
         doc.line(62, 49, 62, doc.internal.pageSize.height - 255); //linea vertical que separa mantenimiento realizado con la fecha
         doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas
-        doc.line(46, 90, doc.internal.pageSize.width - 5, 90); // separacion de titulo 1
-        doc.line(46, 110, doc.internal.pageSize.width - 5, 110); // separacion de titulo 2
+        doc.line(5, 55, doc.internal.pageSize.width - 5, 55); // separacion de titulo 1
+        doc.line(5, 61, doc.internal.pageSize.width - 5, 61); // separacion de titulo 2
       }
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
@@ -349,45 +361,45 @@ export default {
 
       // Calcular la posición de inicio de la segunda tabla
       // const positionFirstTable = 28.5;
-      const positionFirstTable = 49.5;
+      const positionFirstTable = 80;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
-  doc.autoTable({
-    startY: 80,
-    head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
-    body: this.items.map(item => [
-      item.nombreEpp,
-      item.parteCuerpoProteger,
-      item.riesgoControlado,
-      item.cargoAsociado,
-      item.especificacionTecnica,
-      item.uso,
-      item.mantenimiento,
-      item.vidaUtil,
-      item.reposicion,
-      item.disposicionFinal
-    ]), // Datos de la tabla
-    theme: 'grid', // Estilo de la tabla
-    margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
-    styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-    headerStyles: {
-      textColor: '#000',
-      fillColor: [200, 200, 200], // Color gris (F4F4F4)
-    },
-    columnWidth: 'auto', // Anchura automática para la primera columna
-    didDrawPage: function () {
-      // Verificar si hay más de una página adicional
-      const totalPages = doc.internal.getNumberOfPages();
-      if (totalPages > firstPagePosition) {
-        // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
-        for (let i = firstPagePosition + 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          drawHeader(doc);
-          drawBorders(doc);
+      doc.autoTable({
+        startY: 120,
+        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
+        body: this.items.map(item => [
+          item.nombreEpp,
+          item.parteCuerpoProteger,
+          item.riesgoControlado,
+          item.cargoAsociado,
+          item.especificacionTecnica,
+          item.uso,
+          item.mantenimiento,
+          item.vidaUtil,
+          item.reposicion,
+          item.disposicionFinal,
+        ]), // Datos de la tabla
+        theme: 'grid', // Estilo de la tabla
+        margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
+        styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+        headerStyles: {
+          textColor: '#000',
+          fillColor: [200, 200, 200], // Color gris (F4F4F4)
+        },
+        columnWidth: 'auto', // Anchura automática para la primera columna
+        didDrawPage: function () {
+          // Verificar si hay más de una página adicional
+          const totalPages = doc.internal.getNumberOfPages();
+          if (totalPages > firstPagePosition) {
+            // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
+            for (let i = firstPagePosition + 1; i <= totalPages; i++) {
+              doc.setPage(i);
+              drawHeader(doc);
+              drawBorders(doc);
+            }
+          }
         }
-      }
-    }
-  });
+      });
       doc.autoTable({
         startY: positionFirstTable,
         head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
@@ -423,9 +435,9 @@ export default {
       ]);
     }
 
-  if (dataSecondTable.length > 0) {
-    // Calcular la posición de inicio de la segunda tabla
-    const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 9; // Agregar un espacio entre tablas
+    if (dataSecondTable.length > 0) {
+      // Calcular la posición de inicio de la segunda tabla
+      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 9; // Agregar un espacio entre tablas
 
     doc.autoTable({
       startY: positionSecondTableDynamic,

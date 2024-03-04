@@ -62,44 +62,11 @@
         <input type="text" id="referenciaEquipo" name="referenciaEquipo" v-model="referenciaEquipo" placeholder="referencia">
       </div>
     </div>
-    <div class="contenedor_2">
-      <div>
-        <label for="UPM" id="upm">UPM:  </label>
-        <input v-model="UPM" placeholder=" UPM: " />
-      </div>
-    <div>
-      <label for="Marca" id="upm">Marca: </label>
-      <input v-model="marca" placeholder=" Marca:"/>
-    </div>
-    <div>
-      <label for="activos_fijos" id="activos_fijos">Activos Fijos:</label>
-      <input v-model="activos_fijos" placeholder="Activos Fijos: " />
-    </div>
-    <div>
-        <label class="checkbox-label">Mantenimiento Realizado:</label>
-        <label>
-          <input type="radio" v-model="mantenimiento_realizado" value="Preventivo">
-          Preventivo
-        </label>
-        <label>
-          <input type="radio" v-model="mantenimiento_realizado" value="Correctivo">
-          Correctivo
-        </label>
-      </div>
-    <div>
-      <label for="fecha" id="fecha">Fecha</label>
-      <input type="date" v-model="fecha" placeholder="Fecha " />
-    </div>
-    <div>
-      <label for="hora">Hora: </label>
-      <input type="time" id="hora" v-model="hora" placeholder="Hora" />
-    </div>
   </div>
   <div class="contenedor">
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
   </div>
-</div>
   <div>
     <!-- Primera tabla -->
     <table>
@@ -115,12 +82,6 @@
           <th>Vida Útil</th>
           <th>Reposición</th>
           <th>Disposición Final</th>
-          <th>UPM</th>
-          <th>Activos Fijos</th>
-          <th>Marca</th>
-          <th>Mantenimiento Realizado</th>
-          <th>hora</th>
-          <th>Fecha</th>
         </tr>
       </thead>
       <tbody>
@@ -135,12 +96,6 @@
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
           <td>{{ item.disposicionFinal }}</td>
-          <td>{{ item.UPM }}</td>
-          <td>{{ item.activos_fijos }}</td>
-          <td>{{ item.marca }}</td>
-          <td>{{ item.mantenimiento_realizado }}</td>
-          <td>{{ item.hora }}</td>
-          <td>{{ item.fecha }}</td>
         </tr>
       </tbody>
     </table>
@@ -159,11 +114,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in itemsEquipos" :key="index">
-          <td>{{ item.cambioEquipo }}</td>
-          <td>{{ item.realizadoEquipo }}</td>
-          <td>{{ item.cantidadEquipo }}</td>
-          <td>{{ item.referenciaEquipo }}</td>
+        <tr v-for="(itemEq, index) in itemsEquipos" :key="index">
+          <td>{{ itemEq.cambioEquipo }}</td>
+          <td>{{ itemEq.realizadoEquipo }}</td>
+          <td>{{ itemEq.cantidadEquipo }}</td>
+          <td>{{ itemEq.referenciaEquipo }}</td>
         </tr>
       </tbody>
     </table>
@@ -187,19 +142,13 @@ export default {
       vidaUtil: "fhd",
       reposicion: "fdhd",
       disposicionFinal: "g",
-      cambioEquipo: '',
-      realizadoEquipo: '',
-      cantidadEquipo: '',
-      referenciaEquipo: '',
+      cambioEquipo: 'bifo',
+      realizadoEquipo: 'si',
+      cantidadEquipo: '43634',
+      referenciaEquipo: 'sdsg',
+      items: [],
       itemsEquipos: [],
       itemsPerPage: 30,
-      UPM: 'ss',
-      activos_fijos: 'ss',
-      marca: '',
-      mantenimiento_realizado: '',
-      hora: '',
-      fecha: '',
-      items: [],
     };
   },
   methods: {
@@ -215,39 +164,34 @@ export default {
         vidaUtil: this.vidaUtil,
         reposicion: this.reposicion,
         disposicionFinal: this.disposicionFinal,
-        cambioEquipo: this.cambioEquipo,
-        realizadoEquipo: this.realizadoEquipo,
-        cantidadEquipo: this.cantidadEquipo,
-        referenciaEquipo: this.referenciaEquipo,
-        UPM: this.UPM,
-        activos_fijos: this.activos_fijos,
-        marca: this.marca,
-        mantenimiento_realizado: this.mantenimiento_realizado,
-        hora: this.hora,
-        fecha: this.fecha,
-      });      
+      });
+      if (this.cambioEquipo && this.realizadoEquipo && this.cantidadEquipo && this.referenciaEquipo) {
+        this.itemsEquipos.push({
+          cambioEquipo: this.cambioEquipo,
+          realizadoEquipo: this.realizadoEquipo,
+          cantidadEquipo: this.cantidadEquipo,
+          referenciaEquipo: this.referenciaEquipo,
+        });
+      }   
       this.limpiarCampos();
       this.generarPDF();
 
     },
     limpiarCampos() {
-      this.nombreEpp = "";
-      this.parteCuerpoProteger = "";
-      this.riesgoControlado = "";
-      this.cargoAsociado = "";
-      this.especificacionTecnica = "";
-      this.uso = "";
-      this.mantenimiento = "";
-      this.vidaUtil = "";
-      this.reposicion = "";
-      this.disposicionFinal = "";
-      this.UPM = 'ss';
-      this.activos_fijos = 'ss';
-      this.marca = "ss";
-      this.mantenimiento_realizado = '';
-      this.hora = '';
-      this.fecha = '';
-
+      this.nombreEpp = "sdfh";
+      this.parteCuerpoProteger = "sfhdd";
+      this.riesgoControlado = "sdfh";
+      this.cargoAsociado = "shdfd";
+      this.especificacionTecnica = "sfhfd";
+      this.uso = "hdsf";
+      this.mantenimiento = "fdhsd";
+      this.vidaUtil = "fhdf";
+      this.reposicion = "gfh";
+      this.disposicionFinal = "f";
+      this.cambioEquipo = "fg";
+      this.realizadoEquipo = "si";
+      this.cantidadEquipo = "43567";
+      this.referenciaEquipo = "aifguk";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -291,22 +235,22 @@ export default {
 
       // Dibujar el encabezado
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'JPEG', 6, 6, 38, 20);
+        doc.addImage(imagenData, 'PNG', 6, 6, 40, 22);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
-        doc.text('NIT', 138, 10);
+        doc.text('NIT', 138, 9);
         doc.text('123456789-0', 132, 15);
-        doc.text("Codigo Factura", 130, 21);
+        doc.text('Código de Factura', 130, 21);
         const codigoFactura = generarCodigoFactura(); // Generar código de factura
         doc.text(codigoFactura, 135, 27);// doc.setPage(1);
         const fechaActual = new Date().toLocaleDateString();
         doc.text('Fecha', 177, 21)
         doc.text(`${fechaActual}`, 175, 27);
         const totalPages = doc.internal.getNumberOfPages();
-        doc.text('Paginas', 176, 9)
+        doc.text('Página', 176, 9)
         for (let i = 1; i <= totalPages; i++) {
           doc.setPage(i);
-          doc.text(`${i}`,  doc.internal.pageSize.width - 30, 15);
+          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15);
         }
         doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
         doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
@@ -316,6 +260,7 @@ export default {
         doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
+
       function generarSerial() {
             const caracteres = 'ABC1234567890';
             const longitud = 6;
@@ -335,7 +280,7 @@ export default {
 
       function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
         doc.text("Hora: ", 122, 46);
-        doc.text(`${hora}`, 130, 46)
+        doc.text(`${hora}`, 130, 46);
         doc.text("Fecha: ", 65, 46);
         doc.text(`${fecha}`, 75, 46);
         const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
@@ -366,51 +311,17 @@ export default {
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
+      // Dibujar el encabezado y los márgenes en la primera página
+      drawBorders(doc);
+      drawHeader(doc);
 
       // Guardar la posición y el número de página actual
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
       // Calcular la posición de inicio de la segunda tabla
-      // const positionFirstTable = 28.5;
-      const positionFirstTable = 80;
+      const positionFirstTable = 28.5;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
-      doc.autoTable({
-        startY: 120,
-        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Uso', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
-        body: this.items.map(item => [
-          item.nombreEpp,
-          item.parteCuerpoProteger,
-          item.riesgoControlado,
-          item.cargoAsociado,
-          item.especificacionTecnica,
-          item.uso,
-          item.mantenimiento,
-          item.vidaUtil,
-          item.reposicion,
-          item.disposicionFinal,
-        ]), // Datos de la tabla
-        theme: 'grid', // Estilo de la tabla
-        margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se una con el encabezado
-        styles: { fontSize: 8 }, // tamaño de la letra de la tabla
-        headerStyles: {
-          textColor: '#000',
-          fillColor: [200, 200, 200], // Color gris (F4F4F4)
-        },
-        columnWidth: 'auto', // Anchura automática para la primera columna
-        didDrawPage: function () {
-          // Verificar si hay más de una página adicional
-          const totalPages = doc.internal.getNumberOfPages();
-          if (totalPages > firstPagePosition) {
-            // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
-            for (let i = firstPagePosition + 1; i <= totalPages; i++) {
-              doc.setPage(i);
-              drawHeader(doc);
-              drawBorders(doc);
-            }
-          }
-        }
-      });
       doc.autoTable({
         startY: positionFirstTable,
         head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
@@ -438,11 +349,11 @@ export default {
       // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
       let dataSecondTable = [];
     if (this.itemsEquipos.length > 0) {
-      dataSecondTable = this.itemsEquipos.map(item => [
-        item.cambioEquipo,
-        item.realizadoEquipo,
-        item.cantidadEquipo,
-        item.referenciaEquipo,
+      dataSecondTable = this.itemsEquipos.map(itemEq => [
+      itemEq.cambioEquipo,
+      itemEq.realizadoEquipo,
+      itemEq.cantidadEquipo,
+      itemEq.referenciaEquipo,
       ]);
     }
 
@@ -471,7 +382,7 @@ export default {
             doc.setPage(i);
             drawHeader(doc);
             drawBorders(doc);
-             drawEncabezado(doc, this.mantenimiento_realizado, this.fecha, this.hora);
+  
           }
         }
       }
@@ -509,22 +420,5 @@ th, td {
 
 th {
   background-color: #f2f2f2;
-}
-.contenedor_1{
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: left;
-  color: #2c3e50;
-  margin-top: 60px;
-  background-color: gray;
-}
-.contenedor_2 {
-  position: relative;
-  text-align: center;
-  background-color: gray;
-  width: 500px;
-  margin-left: auto;
-  margin-right: auto;
 }
 </style>

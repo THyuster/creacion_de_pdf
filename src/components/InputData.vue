@@ -63,6 +63,39 @@
       </div>
     </div>
   </div>
+  <div class="contenedor_2">
+      <div>
+        <label for="UPM">UPM:  </label>
+        <input v-model="UPM" id="UPM" name="UPM" placeholder=" UPM: " />
+      </div>
+    <div>
+      <label for="marca">Marca: </label>
+      <input v-model="marca" id="marca" name="marca" placeholder=" Marca:"/>
+    </div>
+    <div>
+      <label for="activos_fijos">Activos Fijos:</label>
+      <input v-model="activos_fijos" id="activos_fijos" name="activos_fijos" placeholder="Activos Fijos: " />
+    </div>
+    <div>
+        <label class="checkbox-label">Mantenimiento Realizado:</label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Preventivo">
+          Preventivo
+        </label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Correctivo">
+          Correctivo
+        </label>
+      </div>
+    <div>
+      <label for="fecha">Fecha</label>
+      <input type="date" v-model="fecha" id="fecha" name="fecha" placeholder="Fecha " />
+    </div>
+    <div>
+      <label for="hora">Hora: </label>
+      <input type="time" id="hora" name="hora" v-model="hora" placeholder="Hora" />
+    </div>
+  </div>
   <div class="contenedor">
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
@@ -95,7 +128,12 @@
           <td>{{ item.mantenimiento }}</td>
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
-          <td>{{ item.disposicionFinal }}</td>
+          <td>{{ item.UPM }}</td>
+          <td>{{ item.marca }}</td>
+          <td>{{ item.activos_fijos }}</td>
+          <td>{{ item.mantenimiento_realizado }}</td>
+          <td>{{ item.fecha }}</td>
+          <td>{{ item.hora }}</td>
         </tr>
       </tbody>
     </table>
@@ -174,8 +212,6 @@ export default {
         });
       }   
       this.limpiarCampos();
-      this.generarPDF();
-
     },
     limpiarCampos() {
       this.nombreEpp = "sdfh";
@@ -205,13 +241,13 @@ export default {
         fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
       });
 
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
+      // const pageWidth = doc.internal.pageSize.getWidth();
+      // const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Calcular el centro de la página
-      const centerX = pageWidth / 2;
-      const centerY = pageHeight / 2;
-      console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
+      // // Calcular el centro de la página
+      // const centerX = pageWidth / 2;
+      // const centerY = pageHeight / 2;
+      // console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
 
 
       // Función para dibujar los márgenes de la página
@@ -235,7 +271,7 @@ export default {
 
       // Dibujar el encabezado
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 6, 40, 22);
+        doc.addImage(imagenData, 'PNG', 6, 8, 40, 18);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
         doc.text('NIT', 138, 9);
@@ -276,7 +312,8 @@ export default {
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
       const hora = this.hora;
-      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado);
+      const marca = this.marca;
+      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
 
       function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
         doc.text("Hora: ", 122, 46);
@@ -286,13 +323,18 @@ export default {
         const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
       }
+      const UPM = this.UPM;
+      const activos_fijos = this.activos_fijos;
 
-      drawEncabezado(doc);
+      drawEncabezado(doc, UPM, activos_fijos, marca);
       
-      function drawEncabezado(doc){
+      function drawEncabezado(doc, UPM, activos_fijos, marca) {
         doc.text("UPM:", 8, 33);
+        doc.text(`${UPM}`, 16, 33);
         doc.text("Activo Fija:", 30, 33);
+        doc.text(`${activos_fijos}`, 45, 33);
         doc.text("Marca:", 122, 33);
+        doc.text(`${marca}`, 132, 33);
         doc.text("Serial: ", 8, 40);
         const codigoSerial = generarSerial();
         doc.text(codigoSerial, 180, 40);
@@ -312,14 +354,14 @@ export default {
       drawBorders(doc);
       drawHeader(doc);
       // Dibujar el encabezado y los márgenes en la primera página
-      drawBorders(doc);
-      drawHeader(doc);
+      // drawBorders(doc);
+      // drawHeader(doc);
 
       // Guardar la posición y el número de página actual
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
       // Calcular la posición de inicio de la segunda tabla
-      const positionFirstTable = 28.5;
+      const positionFirstTable = 61.5;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
       doc.autoTable({

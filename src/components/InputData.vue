@@ -227,6 +227,7 @@ export default {
         fecha: this.fecha,
       });      
       this.limpiarCampos();
+      this.generarPDF();
 
     },
     limpiarCampos() {
@@ -252,6 +253,14 @@ export default {
       const jsPDF = await import('jspdf');
       const doc = new jsPDF.default();
 
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.2);
+      doc.setFontSize(8);
+
+      this.items.forEach(item => {
+        fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+      });
+
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -260,9 +269,6 @@ export default {
       const centerY = pageHeight / 2;
       console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
 
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.2);
-      doc.setFontSize(8);
 
       // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
@@ -320,26 +326,31 @@ export default {
             }
             return serial;
           }
+        
 
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
       const hora = this.hora;
+      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado);
 
-      drawEncabezado(doc, mantenimiento_realizado, fecha, hora);
-      
-      function drawEncabezado(doc, mantenimiento_realizado, fecha){
-        doc.text("UPM:", 8, 33);
-        doc.text("Activo Fija:", 30, 33);
-        doc.text("Marca:", 122, 33);
-        doc.text("Serial: ", 8, 40);
-        const codigoSerial = generarSerial();
-        doc.text(codigoSerial, 180, 40);
+      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
         doc.text("Hora: ", 122, 46);
         doc.text(`${hora}`, 130, 46)
         doc.text("Fecha: ", 65, 46);
         doc.text(`${fecha}`, 75, 46);
         const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
+      }
+
+      drawEncabezado(doc);
+      
+      function drawEncabezado(doc){
+        doc.text("UPM:", 8, 33);
+        doc.text("Activo Fija:", 30, 33);
+        doc.text("Marca:", 122, 33);
+        doc.text("Serial: ", 8, 40);
+        const codigoSerial = generarSerial();
+        doc.text(codigoSerial, 180, 40);
         doc.text("Actividades Realizados e Insumos Utilizados", 75, 53);
         doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
@@ -380,8 +391,8 @@ export default {
           item.disposicionFinal,
         ]), // Datos de la tabla
         theme: 'grid', // Estilo de la tabla
-        margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se solape con el encabezado
-        styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+        margin: { top: 28.5, left: 5.5, right: 5.5}, // Margen superior para evitar que se una con el encabezado
+        styles: { fontSize: 8 }, // tamaño de la letra de la tabla
         headerStyles: {
           textColor: '#000',
           fillColor: [200, 200, 200], // Color gris (F4F4F4)
@@ -460,6 +471,7 @@ export default {
             doc.setPage(i);
             drawHeader(doc);
             drawBorders(doc);
+             drawEncabezado(doc, this.mantenimiento_realizado, this.fecha, this.hora);
           }
         }
       }

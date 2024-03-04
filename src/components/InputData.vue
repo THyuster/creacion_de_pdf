@@ -163,8 +163,7 @@
     </table>
     <p v-else>No hay datos para mostrar en la segunda tabla.</p>
   </div>
-</template>
-<script>
+</template><script>
 import imagenData from '@/assets/logoMLA.png';
 import 'jspdf-autotable';
 
@@ -213,6 +212,7 @@ export default {
         });
       }   
       this.limpiarCampos();
+
     },
     limpiarCampos() {
       this.nombreEpp = "sdfh";
@@ -239,7 +239,9 @@ export default {
       doc.setFontSize(8);
 
       this.items.forEach(item => {
-        fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+        if (item.hora && item.fecha && item.mantenimiento_realizado) {
+          fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+        }
       });
 
       // const pageWidth = doc.internal.pageSize.getWidth();
@@ -272,7 +274,7 @@ export default {
 
       // Dibujar el encabezado
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 8, 40, 18);
+        doc.addImage(imagenData, 'PNG', 6, 6, 40, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
         doc.text('NIT', 138, 9);
@@ -332,8 +334,8 @@ export default {
       function drawEncabezado(doc, UPM, activos_fijos, marca) {
         doc.text("UPM:", 8, 33);
         doc.text(`${UPM}`, 16, 33);
-        doc.text("Activo Fija:", 30, 33);
-        doc.text(`${activos_fijos}`, 45, 33);
+        doc.text("Activo Fija:", 34, 33);
+        doc.text(`${activos_fijos}`, 49, 33);
         doc.text("Marca:", 122, 33);
         doc.text(`${marca}`, 132, 33);
         doc.text("Serial: ", 8, 40);
@@ -342,7 +344,7 @@ export default {
         doc.text("Actividades Realizados e Insumos Utilizados", 75, 53);
         doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
-        doc.line(26, 28, 26, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
         doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado
@@ -354,10 +356,6 @@ export default {
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
-      // Dibujar el encabezado y los márgenes en la primera página
-      // drawBorders(doc);
-      // drawHeader(doc);
-
       // Guardar la posición y el número de página actual
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 

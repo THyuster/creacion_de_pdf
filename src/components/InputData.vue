@@ -63,6 +63,39 @@
       </div>
     </div>
   </div>
+  <div class="contenedor_2">
+      <div>
+        <label for="UPM" id="upm">UPM:  </label>
+        <input v-model="UPM" placeholder=" UPM: " />
+      </div>
+    <div>
+      <label for="Marca" id="upm">Marca: </label>
+      <input v-model="marca" placeholder=" Marca:"/>
+    </div>
+    <div>
+      <label for="activos_fijos" id="activos_fijos">Activos Fijos:</label>
+      <input v-model="activos_fijos" placeholder="Activos Fijos: " />
+    </div>
+    <div>
+        <label class="checkbox-label">Mantenimiento Realizado:</label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Preventivo">
+          Preventivo
+        </label>
+        <label>
+          <input type="radio" v-model="mantenimiento_realizado" value="Correctivo">
+          Correctivo
+        </label>
+      </div>
+    <div>
+      <label for="fecha" id="fecha">Fecha</label>
+      <input type="date" v-model="fecha" placeholder="Fecha " />
+    </div>
+    <div>
+      <label for="hora">Hora: </label>
+      <input type="time" id="hora" v-model="hora" placeholder="Hora" />
+    </div>
+  </div>
   <div class="contenedor">
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
@@ -319,7 +352,7 @@ export default {
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
       // Calcular la posición de inicio de la segunda tabla
-      const positionFirstTable = 28.5;
+      const positionFirstTable = 61.5;
       const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
       doc.autoTable({

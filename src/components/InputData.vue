@@ -157,8 +157,7 @@
     </table>
     <p v-else>No hay datos para mostrar en la segunda tabla.</p>
   </div>
-</template>
-<script>
+</template><script>
 import imagenData from '@/assets/logoMLA.png';
 import 'jspdf-autotable';
 
@@ -207,7 +206,6 @@ export default {
         });
       }   
       this.limpiarCampos();
-      this.generarPDF();
 
     },
     limpiarCampos() {
@@ -235,7 +233,9 @@ export default {
       doc.setFontSize(8);
 
       this.items.forEach(item => {
-        fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+        if (item.hora && item.fecha && item.mantenimiento_realizado) {
+          fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+        }
       });
 
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -268,7 +268,7 @@ export default {
 
       // Dibujar el encabezado
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 6, 40, 22);
+        doc.addImage(imagenData, 'PNG', 6, 6, 30, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
         doc.text('NIT', 138, 9);
@@ -344,10 +344,6 @@ export default {
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
-      // Dibujar el encabezado y los márgenes en la primera página
-      drawBorders(doc);
-      drawHeader(doc);
-
       // Guardar la posición y el número de página actual
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 

@@ -353,9 +353,6 @@ export default {
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
-      // Dibujar el encabezado y los márgenes en la primera página
-      // drawBorders(doc);
-      // drawHeader(doc);
 
       // Guardar la posición y el número de página actual
       const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;

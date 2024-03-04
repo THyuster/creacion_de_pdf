@@ -65,16 +65,16 @@
   </div>
   <div class="contenedor_2">
       <div>
-        <label for="UPM" id="upm">UPM:  </label>
-        <input v-model="UPM" placeholder=" UPM: " />
+        <label for="UPM">UPM:  </label>
+        <input v-model="UPM" id="UPM" name="UPM" placeholder=" UPM: " />
       </div>
     <div>
-      <label for="Marca" id="upm">Marca: </label>
-      <input v-model="marca" placeholder=" Marca:"/>
+      <label for="marca">Marca: </label>
+      <input v-model="marca" id="marca" name="marca" placeholder=" Marca:"/>
     </div>
     <div>
-      <label for="activos_fijos" id="activos_fijos">Activos Fijos:</label>
-      <input v-model="activos_fijos" placeholder="Activos Fijos: " />
+      <label for="activos_fijos">Activos Fijos:</label>
+      <input v-model="activos_fijos" id="activos_fijos" name="activos_fijos" placeholder="Activos Fijos: " />
     </div>
     <div>
         <label class="checkbox-label">Mantenimiento Realizado:</label>
@@ -88,12 +88,12 @@
         </label>
       </div>
     <div>
-      <label for="fecha" id="fecha">Fecha</label>
-      <input type="date" v-model="fecha" placeholder="Fecha " />
+      <label for="fecha">Fecha</label>
+      <input type="date" v-model="fecha" id="fecha" name="fecha" placeholder="Fecha " />
     </div>
     <div>
       <label for="hora">Hora: </label>
-      <input type="time" id="hora" v-model="hora" placeholder="Hora" />
+      <input type="time" id="hora" name="hora" v-model="hora" placeholder="Hora" />
     </div>
   </div>
   <div class="contenedor">
@@ -128,7 +128,12 @@
           <td>{{ item.mantenimiento }}</td>
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
-          <td>{{ item.disposicionFinal }}</td>
+          <td>{{ item.UPM }}</td>
+          <td>{{ item.marca }}</td>
+          <td>{{ item.activos_fijos }}</td>
+          <td>{{ item.mantenimiento_realizado }}</td>
+          <td>{{ item.fecha }}</td>
+          <td>{{ item.hora }}</td>
         </tr>
       </tbody>
     </table>
@@ -238,13 +243,13 @@ export default {
         }
       });
 
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
+      // const pageWidth = doc.internal.pageSize.getWidth();
+      // const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Calcular el centro de la página
-      const centerX = pageWidth / 2;
-      const centerY = pageHeight / 2;
-      console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
+      // // Calcular el centro de la página
+      // const centerX = pageWidth / 2;
+      // const centerY = pageHeight / 2;
+      // console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
 
 
       // Función para dibujar los márgenes de la página
@@ -309,7 +314,8 @@ export default {
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
       const hora = this.hora;
-      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado);
+      const marca = this.marca;
+      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
 
       function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
         doc.text("Hora: ", 122, 46);
@@ -319,20 +325,25 @@ export default {
         const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
       }
+      const UPM = this.UPM;
+      const activos_fijos = this.activos_fijos;
 
-      drawEncabezado(doc);
+      drawEncabezado(doc, UPM, activos_fijos, marca);
       
-      function drawEncabezado(doc){
+      function drawEncabezado(doc, UPM, activos_fijos, marca) {
         doc.text("UPM:", 8, 33);
-        doc.text("Activo Fija:", 30, 33);
+        doc.text(`${UPM}`, 16, 33);
+        doc.text("Activo Fija:", 34, 33);
+        doc.text(`${activos_fijos}`, 49, 33);
         doc.text("Marca:", 122, 33);
+        doc.text(`${marca}`, 132, 33);
         doc.text("Serial: ", 8, 40);
         const codigoSerial = generarSerial();
         doc.text(codigoSerial, 180, 40);
         doc.text("Actividades Realizados e Insumos Utilizados", 75, 53);
         doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
-        doc.line(26, 28, 26, doc.internal.pageSize.height - 262); //linea vertical despues de upm
+        doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
         doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado

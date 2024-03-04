@@ -128,12 +128,13 @@
           <td>{{ item.mantenimiento }}</td>
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
-          <td>{{ item.UPM }}</td>
+          <td>{{ item.disposicionFinal }}</td>
+          <!-- <td>{{ item.UPM }}</td>
           <td>{{ item.marca }}</td>
           <td>{{ item.activos_fijos }}</td>
           <td>{{ item.mantenimiento_realizado }}</td>
           <td>{{ item.fecha }}</td>
-          <td>{{ item.hora }}</td>
+          <td>{{ item.hora }}</td> -->
         </tr>
       </tbody>
     </table>

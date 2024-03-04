@@ -268,7 +268,7 @@ export default {
 
       // Dibujar el encabezado
       function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 6, 30, 20);
+        doc.addImage(imagenData, 'PNG', 6, 6, 40, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
         doc.text('Actas De Mantenimiento Electrico', 61, 23)
         doc.text('NIT', 138, 9);

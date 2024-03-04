@@ -61,6 +61,22 @@
         <label for="referenciaEquipo">Referencia</label>
         <input type="text" id="referenciaEquipo" name="referenciaEquipo" v-model="referenciaEquipo" placeholder="referencia">
       </div>
+      <div>
+        <label for="inspeccionEquipo">Inspección</label>
+        <input type="text" id="inspeccionEquipo" name="inspeccionEquipo" v-model="inspeccionEquipo" placeholder="inspección">
+      </div>
+      <div>
+        <label for="estadoEquipo">Estado</label>
+        <select name="estadoEquipo" id="estadoEquipo" v-model="estadoEquipo">
+          <option value="">Estado</option>
+          <option value="Bueno">Bueno</option>
+          <option value="Malo">Malo</option>
+        </select>
+      </div>
+      <div>
+        <label for="observacionesEquipo">Observaciones equipo</label>
+        <input type="text" id="observacionesEquipo" name="observacionesEquipo" v-model="observacionesEquipo" placeholder="observaciones a Equipo">
+      </div>
     </div>
   </div>
   <div class="contenedor_2">
@@ -129,12 +145,6 @@
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
           <td>{{ item.disposicionFinal }}</td>
-          <!-- <td>{{ item.UPM }}</td>
-          <td>{{ item.marca }}</td>
-          <td>{{ item.activos_fijos }}</td>
-          <td>{{ item.mantenimiento_realizado }}</td>
-          <td>{{ item.fecha }}</td>
-          <td>{{ item.hora }}</td> -->
         </tr>
       </tbody>
     </table>
@@ -161,9 +171,29 @@
         </tr>
       </tbody>
     </table>
-    <p v-else>No hay datos para mostrar en la segunda tabla.</p>
+
+    <table v-if="itemsInspeccionEquipos.length > 0">
+      <thead>
+        <tr>
+          <th colspan="4">Inspección equipo</th>
+        </tr>
+        <tr>
+          <th>Inspección</th>
+          <th>Estado</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(itemInspeccionEq, index) in itemsInspeccionEquipos" :key="index">
+          <td>{{ itemInspeccionEq.inspeccionEquipo }}</td>
+          <td>{{ itemInspeccionEq.estadoEquipo }}</td>
+          <td>{{ itemInspeccionEq.observacionesEquipo }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-</template><script>
+</template>
+<script>
 import imagenData from '@/assets/logoMLA.png';
 import 'jspdf-autotable';
 
@@ -184,8 +214,12 @@ export default {
       realizadoEquipo: 'si',
       cantidadEquipo: '43634',
       referenciaEquipo: 'sdsg',
+      inspeccionEquipo: 'rgw',
+      estadoEquipo: 'Bueno',
+      observacionesEquipo: 'ninguna',
       items: [],
       itemsEquipos: [],
+      itemsInspeccionEquipos: [],
       itemsPerPage: 30,
     };
   },
@@ -203,14 +237,21 @@ export default {
         reposicion: this.reposicion,
         disposicionFinal: this.disposicionFinal,
       });
-      if (this.cambioEquipo && this.realizadoEquipo && this.cantidadEquipo && this.referenciaEquipo) {
+      if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
         this.itemsEquipos.push({
           cambioEquipo: this.cambioEquipo,
           realizadoEquipo: this.realizadoEquipo,
           cantidadEquipo: this.cantidadEquipo,
           referenciaEquipo: this.referenciaEquipo,
         });
-      }   
+      }
+      if (this.inspeccionEquipo || this.estadoEquipo || this.observacionesEquipo) {
+        this.itemsInspeccionEquipos.push({
+          inspeccionEquipo: this.inspeccionEquipo,
+          estadoEquipo: this.estadoEquipo,
+          observacionesEquipo: this.observacionesEquipo,
+        });
+      }  
       this.limpiarCampos();
 
     },
@@ -229,6 +270,9 @@ export default {
       this.realizadoEquipo = "si";
       this.cantidadEquipo = "43567";
       this.referenciaEquipo = "aifguk";
+      this.inspeccionEquipo = "referencia";
+      this.estadoEquipo = "bueno";
+      this.observacionesEquipo = "aaaa";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -243,15 +287,6 @@ export default {
           fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
         }
       });
-
-      // const pageWidth = doc.internal.pageSize.getWidth();
-      // const pageHeight = doc.internal.pageSize.getHeight();
-
-      // // Calcular el centro de la página
-      // const centerX = pageWidth / 2;
-      // const centerY = pageHeight / 2;
-      // console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
-
 
       // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
@@ -301,16 +336,15 @@ export default {
       }
 
       function generarSerial() {
-            const caracteres = 'ABC1234567890';
-            const longitud = 6;
-            let serial = '';
-            for (let i = 0; i < longitud; i++) {
-              const indice = Math.floor(Math.random() * caracteres.length);
-              serial += caracteres.charAt(indice);
-            }
-            return serial;
-          }
-        
+        const caracteres = 'ABC1234567890';
+        const longitud = 6;
+        let serial = '';
+        for (let i = 0; i < longitud; i++) {
+          const indice = Math.floor(Math.random() * caracteres.length);
+          serial += caracteres.charAt(indice);
+        }
+        return serial;
+      }      
 
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
@@ -318,12 +352,12 @@ export default {
       const marca = this.marca;
       fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
 
-      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
+      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado) {
         doc.text("Hora: ", 122, 46);
         doc.text(`${hora}`, 130, 46);
         doc.text("Fecha: ", 65, 46);
         doc.text(`${fecha}`, 75, 46);
-        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
+        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
       }
       const UPM = this.UPM;
@@ -399,11 +433,14 @@ export default {
     }
 
     if (dataSecondTable.length > 0) {
-      // Calcular la posición de inicio de la segunda tabla
-      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 9; // Agregar un espacio entre tablas
+      // Calcular la posición de inicio de la segunda tabla       
+      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12; // Agregar un espacio entre tablas
+      doc.line(5, positionSecondTableDynamic - 4, doc.internal.pageSize.width - 5, positionSecondTableDynamic - 4); //linea de separacion de equipos
+      doc.text("Equipo", 96, positionSecondTableDynamic);
+      doc.line(5, positionSecondTableDynamic + 2, doc.internal.pageSize.width - 5, positionSecondTableDynamic + 2); //linea de separacion de equipos 
 
     doc.autoTable({
-      startY: positionSecondTableDynamic,
+      startY: positionSecondTableDynamic + 2.5,
       head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']], // Encabezado de la segunda tabla
       body: dataSecondTable,
       theme: 'grid', // Estilo de la tabla
@@ -428,9 +465,53 @@ export default {
         }
       }
     });
-      }
+    // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
+let dataThirdTable = [];
+if (this.itemsInspeccionEquipos.length > 0) {
+  dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
+    itemInspeccionEq.inspeccionEquipo,
+    itemInspeccionEq.estadoEquipo,
+    itemInspeccionEq.observacionesEquipo,
+  ]);
+}
 
-      doc.save("informacion.pdf");
+if (dataThirdTable.length > 0) {
+  const heightSecondTable = 2 + dataSecondTable.length * 6.8;
+  const positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 11.5;
+  doc.line(5, positionThirdTableDynamic - 4, doc.internal.pageSize.width - 5, positionThirdTableDynamic - 4); //linea de separacion de equipos
+  doc.text("Inspección de equipo", 87, positionThirdTableDynamic);
+  doc.line(5, positionThirdTableDynamic + 2, doc.internal.pageSize.width - 5, positionThirdTableDynamic + 2);
+
+  doc.autoTable({
+    startY: positionThirdTableDynamic + 2.5,
+    head: [['Inspección', 'Estado', 'Observaciones']], // Encabezado de la tercera tabla
+    body: dataThirdTable,
+    theme: 'grid', // Estilo de la tabla
+    margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
+    styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+    headerStyles: {
+      textColor: '#000',
+      fillColor: [200, 200, 200], // Color gris (F4F4F4)
+    },
+    columnWidth: 'auto',
+    didDrawPage: function () {
+      // Verificar si hay más de una página adicional
+      const totalPages = doc.internal.getNumberOfPages();
+      if (totalPages > firstPagePosition) {
+        // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
+        for (let i = firstPagePosition + 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          drawHeader(doc);
+          drawBorders(doc);
+        }
+      }
+    }
+  });
+}
+
+  }
+
+    doc.save("informacion.pdf");
     }
   }
 }

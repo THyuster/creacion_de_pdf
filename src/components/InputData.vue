@@ -281,25 +281,19 @@ export default {
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
-      const doc = new jsPDF.default();
+    const doc = new jsPDF.default();
 
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.2);
-      doc.setFontSize(8);
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    doc.setFontSize(8);
 
-      this.items.forEach(item => {
-        if (item.hora && item.fecha && item.mantenimiento_realizado) {
-          fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
-        }
-      });
-
-      // Función para dibujar los márgenes de la página
-      function drawBorders(doc) {
+    // Función para dibujar los márgenes de la página
+    function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
-      }
+    }
 
       function generarCodigoFactura() {
         const caracteres = '1234567890';
@@ -398,122 +392,136 @@ export default {
       // Guardar la posición y el número de página actual
       const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
-      // Calcular la posición de inicio de la segunda tabla
-      const positionFirstTable = 61.5;
-      const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
+    // Calcular la posición de inicio de la primera tabla
+    const positionFirstTable = 61.5;
+    const heightFirstTable = 2 + this.items.length * 6.8;
 
-      doc.autoTable({
+    // Dibujar la primera tabla
+    doc.autoTable({
         startY: positionFirstTable,
-        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
+        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']],
         body: this.items.map(item => [
-          item.nombreEpp,
-          item.parteCuerpoProteger,
-          item.riesgoControlado,
-          item.cargoAsociado,
-          item.especificacionTecnica,
-          item.mantenimiento,
-          item.vidaUtil,
-          item.reposicion,
-          item.disposicionFinal,
+            item.nombreEpp,
+            item.parteCuerpoProteger,
+            item.riesgoControlado,
+            item.cargoAsociado,
+            item.especificacionTecnica,
+            item.mantenimiento,
+            item.vidaUtil,
+            item.reposicion,
+            item.disposicionFinal,
         ]),
-        theme: 'grid', // Estilo de la tabla
-        margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
-        styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+        theme: 'grid',
+        margin: { top: 28.5, left: 5.5, right: 5.5 },
+        styles: { fontSize: 8 },
         headerStyles: {
-          textColor: '#000',
-          fillColor: [200, 200, 200], // Color gris (F4F4F4)
+            textColor: '#000',
+            fillColor: [200, 200, 200],
         },
-        columnWidth: 'auto', // Anchura automática para la primera columna
+        columnWidth: 'auto',
         didDrawPage: function () {
-          const totalPages = doc.internal.getNumberOfPages();
-          if (totalPages > pagePosition) {
-            drawHeader(doc);
-            drawBorders(doc);
-          }
+            const totalPages = doc.internal.getNumberOfPages();
+            if (totalPages > pagePosition) {
+                drawHeader(doc);
+                drawBorders(doc);
+            }
+        },
+        willDrawCell: function (hookData) {
+            const pageHeight = doc.internal.pageSize.height;
+            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
+                hookData.addPage();
+            }
         }
-      });
+    });
 
-      // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
-      let dataSecondTable = [];
+    // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
+    let dataSecondTable = [];
     if (this.itemsEquipos.length > 0) {
-      dataSecondTable = this.itemsEquipos.map(itemEq => [
-      itemEq.cambioEquipo,
-      itemEq.realizadoEquipo,
-      itemEq.cantidadEquipo,
-      itemEq.referenciaEquipo,
-      ]);
+        dataSecondTable = this.itemsEquipos.map(itemEq => [
+            itemEq.cambioEquipo,
+            itemEq.realizadoEquipo,
+            itemEq.cantidadEquipo,
+            itemEq.referenciaEquipo,
+        ]);
+
+        if (dataSecondTable.length > 0) {
+            // Calcular la posición de inicio de la segunda tabla
+            const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 6; // Ajustar la posición aquí
+
+            doc.autoTable({
+                startY: positionSecondTableDynamic,
+                head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']],
+                body: dataSecondTable,
+                theme: 'grid',
+                margin: { top: 28.5, left: 5.5, right: 5.5 },
+                styles: { fontSize: 8 },
+                headerStyles: {
+                    textColor: '#000',
+                    fillColor: [200, 200, 200],
+                },
+                columnWidth: 'auto',
+                didDrawPage: function () {
+                    const totalPages = doc.internal.getNumberOfPages();
+                    if (totalPages > pagePosition) {
+                        drawHeader(doc);
+                        drawBorders(doc);
+                    }
+                },
+                willDrawCell: function (hookData) {
+            const pageHeight = doc.internal.pageSize.height;
+            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
+                hookData.addPage();
+            }
+        }
+            });
+
+            // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
+            let dataThirdTable = [];
+            if (this.itemsInspeccionEquipos.length > 0) {
+                dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
+                    itemInspeccionEq.inspeccionEquipo,
+                    itemInspeccionEq.estadoEquipo,
+                    itemInspeccionEq.observacionesEquipo,
+                ]);
+
+                if (dataThirdTable.length > 0) {
+                    // Calcular la altura de la segunda tabla
+                    // const heightSecondTable = 2 + dataSecondTable.length * 6.8;
+                    const positionThirdTableDynamic = positionSecondTableDynamic + 26; // Ajustar la posición aquí
+
+                    doc.autoTable({
+                        startY: positionThirdTableDynamic,
+                        head: [['Inspección', 'Estado', 'Observaciones']],
+                        body: dataThirdTable,
+                        theme: 'grid',
+                        margin: { top: 28.5, left: 5.5, right: 5.5 },
+                        styles: { fontSize: 8 },
+                        headerStyles: {
+                            textColor: '#000',
+                            fillColor: [200, 200, 200],
+                        },
+                        columnWidth: 'auto',
+                        didDrawPage: function () {
+                            const totalPages = doc.internal.getNumberOfPages();
+                            if (totalPages > pagePosition) {
+                                drawHeader(doc);
+                                drawBorders(doc);
+                            }
+                        },
+                        willDrawCell: function (hookData) {
+            const pageHeight = doc.internal.pageSize.height;
+            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
+                hookData.addPage();
+            }
+        }
+                    });
+                }
+            }
+        }
     }
-
-    if (dataSecondTable.length > 0) {
-      // Calcular la posición de inicio de la segunda tabla       
-      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12;
-
-        doc.line(5, positionSecondTableDynamic - 4, doc.internal.pageSize.width - 5, positionSecondTableDynamic - 4);
-        doc.text("Equipo", 96, positionSecondTableDynamic);
-        doc.line(5, positionSecondTableDynamic + 2, doc.internal.pageSize.width - 5, positionSecondTableDynamic + 2);
-
-        doc.autoTable({
-            startY: positionSecondTableDynamic + 2.5,
-            head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']],
-            body: dataSecondTable,
-            theme: 'grid',
-            margin: { top: 28.5, left: 5.5, right: 5.5 },
-            styles: { fontSize: 8 },
-            headerStyles: {
-                textColor: '#000',
-                fillColor: [200, 200, 200],
-            },
-            columnWidth: 'auto',
-            didDrawPage: function () {
-                const totalPages = doc.internal.getNumberOfPages();
-                if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
-                }
-            }
-        });
-    // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
-let dataThirdTable = [];
-if (this.itemsInspeccionEquipos.length > 0) {
-  dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
-    itemInspeccionEq.inspeccionEquipo,
-    itemInspeccionEq.estadoEquipo,
-    itemInspeccionEq.observacionesEquipo,
-  ]);
-}
-
-if (dataThirdTable.length > 0) {
-    // Calcular la altura de la segunda tabla
-    const heightSecondTable = 2 + dataSecondTable.length * 6.8;
-        const positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 11;
-
-        doc.line(5, positionThirdTableDynamic - 4, doc.internal.pageSize.width - 5, positionThirdTableDynamic - 4);
-        doc.text("Inspección de equipo", 87, positionThirdTableDynamic);
-        doc.line(5, positionThirdTableDynamic + 2, doc.internal.pageSize.width - 5, positionThirdTableDynamic + 2);
-
-        doc.autoTable({
-            startY: positionThirdTableDynamic + 2.5,
-            head: [['Inspección', 'Estado', 'Observaciones']],
-            body: dataThirdTable,
-            theme: 'grid',
-            margin: { top: 28.5, left: 5.5, right: 5.5 },
-            styles: { fontSize: 8 },
-            headerStyles: {
-                textColor: '#000',
-                fillColor: [200, 200, 200],
-            },
-            columnWidth: 'auto',
-            didDrawPage: function () {
-                const totalPages = doc.internal.getNumberOfPages();
-                if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
-                }
-            }
-        });
-}
-
-  }
 
     doc.save("informacion.pdf");
     }

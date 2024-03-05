@@ -96,6 +96,12 @@
       <input type="time" id="hora" name="hora" v-model="hora" placeholder="Hora" />
     </div>
   </div>
+  <div class="contenedor3">
+    <div>
+      <label for="observaciones">Actividades Realizadas No Realizadas: </label>
+      <input type="text" id="actividades_RelacionadasNR" name="acitivadesRelacionados" v-model="Actividades_relacionadasNR" placeholder="Actividades Relacionadas No Relacionadas">
+    </div>
+  </div>
   <div class="contenedor">
     <button @click="guardarItem">Guardar ítem</button>
     <button @click="generarPDF">Generar PDF</button>
@@ -128,12 +134,7 @@
           <td>{{ item.mantenimiento }}</td>
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
-          <td>{{ item.UPM }}</td>
-          <td>{{ item.marca }}</td>
-          <td>{{ item.activos_fijos }}</td>
-          <td>{{ item.mantenimiento_realizado }}</td>
-          <td>{{ item.fecha }}</td>
-          <td>{{ item.hora }}</td>
+          <td> {{ item.disposicionFinal}}</td>
         </tr>
       </tbody>
     </table>
@@ -160,9 +161,22 @@
         </tr>
       </tbody>
     </table>
+    <table v-if="ActividadesRelacionadasNR_O.length > 0">
+      <thead>
+        <tr>
+          <th colspan="1">actividades Relacionadas No Relacionadas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(Actividades_relacionadasNR_OR, index) in ActividadesRelacionadasNR_O" :key="index">
+          <td>{{ Actividades_relacionadasNR_OR.Actividades_relacionadasNR}}</td>
+        </tr>
+      </tbody>
+    </table>
     <p v-else>No hay datos para mostrar en la segunda tabla.</p>
   </div>
-</template><script>
+</template>
+<script>
 import imagenData from '@/assets/logoMLA.png';
 import 'jspdf-autotable';
 
@@ -183,8 +197,10 @@ export default {
       realizadoEquipo: 'si',
       cantidadEquipo: '43634',
       referenciaEquipo: 'sdsg',
+      Actividades_relacionadasNR: '',
       items: [],
       itemsEquipos: [],
+      ActividadesRelacionadasNR_O: [],
       itemsPerPage: 30,
     };
   },
@@ -202,13 +218,18 @@ export default {
         reposicion: this.reposicion,
         disposicionFinal: this.disposicionFinal,
       });
-      if (this.cambioEquipo && this.realizadoEquipo && this.cantidadEquipo && this.referenciaEquipo) {
+      if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
         this.itemsEquipos.push({
           cambioEquipo: this.cambioEquipo,
           realizadoEquipo: this.realizadoEquipo,
           cantidadEquipo: this.cantidadEquipo,
           referenciaEquipo: this.referenciaEquipo,
         });
+      if (this.Actividades_relacionadasNR){
+        this.ActividadesRelacionadasNR_O.push({
+          Actividades_relacionadasNR: this.Actividades_relacionadasNR
+        })
+      }
       }   
       this.limpiarCampos();
 
@@ -228,6 +249,7 @@ export default {
       this.realizadoEquipo = "si";
       this.cantidadEquipo = "43567";
       this.referenciaEquipo = "aifguk";
+      this.Actividades_relacionadasNR = "gg";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -356,7 +378,7 @@ export default {
       drawBorders(doc);
       drawHeader(doc);
       // Guardar la posición y el número de página actual
-      const firstPagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+      
 
       // Calcular la posición de inicio de la segunda tabla
       const positionFirstTable = 61.5;
@@ -385,24 +407,35 @@ export default {
         },
         columnWidth: 'auto', // Anchura automática para la primera columna
       });
-
       // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
       let dataSecondTable = [];
-    if (this.itemsEquipos.length > 0) {
-      dataSecondTable = this.itemsEquipos.map(itemEq => [
+  if (this.itemsEquipos.length > 0) {
+    dataSecondTable = this.itemsEquipos.map(itemEq => [
       itemEq.cambioEquipo,
       itemEq.realizadoEquipo,
       itemEq.cantidadEquipo,
       itemEq.referenciaEquipo,
-      ]);
-    }
+    ]);
+  }
 
-    if (dataSecondTable.length > 0) {
-      // Calcular la posición de inicio de la segunda tabla
-      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 9; // Agregar un espacio entre tablas
+  
+
+  if (dataSecondTable.length > 0) {
+    // Calcular la posición de inicio de la segunda tabla
+    let positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12; // Agregar un espacio entre tablas
+    doc.line(5, positionSecondTableDynamic - 4, doc.internal.pageSize.width - 5, positionSecondTableDynamic - 4); // línea de separación de equipos
+    doc.text("EQUIPOS", 96, positionSecondTableDynamic);
+    doc.line(5, positionSecondTableDynamic + 2, doc.internal.pageSize.width - 5, positionSecondTableDynamic + 2); // línea de separación de equipos
+    let positionThirdTableDynamic = positionSecondTableDynamic + 10; // Incrementa el espacio entre tablas
+
+  // Verificar si hay suficiente espacio en la página actual para mostrar la tercera tabla
+  if (positionThirdTableDynamic + 20 > doc.internal.pageSize.height) {
+    doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
+    positionThirdTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
+  }
 
     doc.autoTable({
-      startY: positionSecondTableDynamic,
+      startY: positionSecondTableDynamic + 2.5,
       head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']], // Encabezado de la segunda tabla
       body: dataSecondTable,
       theme: 'grid', // Estilo de la tabla
@@ -414,20 +447,61 @@ export default {
       },
       columnWidth: 'auto',
       didDrawPage: function () {
-        // Verificar si hay más de una página adicional
-        const totalPages = doc.internal.getNumberOfPages();
-        if (totalPages > firstPagePosition) {
-          // Iterar a través de las páginas adicionales y dibujar el encabezado y los márgenes
-          for (let i = firstPagePosition + 1; i <= totalPages; i++) {
-            doc.setPage(i);
             drawHeader(doc);
             drawBorders(doc);
-  
           }
-        }
-      }
     });
-      }
+
+    // Verificar si hay datos para la tercera tabla antes de agregarla al PDF
+   // Verificar si hay datos para la tercera tabla antes de agregarla al PDF
+let dataThirdTable = [];
+if (this.ActividadesRelacionadasNR_O.length > 0) {
+  dataThirdTable = this.ActividadesRelacionadasNR_O.map(item => [
+    item.Actividades_relacionadasNR,
+  ]);
+}
+
+if (dataThirdTable.length > 0) {
+  // Calcular la posición de inicio de la tercera tabla
+  const heightSecondTable = 2 + dataSecondTable.length * 6.8; // Calcular la altura de la segunda tabla
+  let positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 12; // Agregar un espacio entre tablas
+  const heightRequired = 20; // Altura requerida para el título y al menos una fila de la tabla
+  const remainingHeight = doc.internal.pageSize.height - positionThirdTableDynamic;
+  
+  // Verificar si hay espacio suficiente en la página actual para la tercera tabla
+  if (remainingHeight < heightRequired) {
+    // No hay suficiente espacio, agregar una nueva página
+    doc.addPage(); // Pasar a la siguiente página
+    drawBorders(doc); // Dibujar los márgenes en la nueva página
+    drawHeader(doc); // Dibujar el encabezado en la nueva página
+    positionSecondTableDynamic = 28.5; // Restablecer la posición de inicio de la segunda tabla en la nueva página
+    positionThirdTableDynamic = positionSecondTableDynamic + 12; // Establecer la posición de inicio de la tercera tabla en la nueva página
+  }
+
+  doc.line(5, positionThirdTableDynamic - 4, doc.internal.pageSize.width - 5, positionThirdTableDynamic - 4); // línea de separación de la tercera tabla
+  doc.text("ACTIVIDADES RELACIONADAS", 85, positionThirdTableDynamic);
+  doc.line(5, positionThirdTableDynamic + 2, doc.internal.pageSize.width - 5, positionThirdTableDynamic + 2); // línea de separación de la tercera tabla
+
+  // Agregar la tercera tabla al PDF
+  doc.autoTable({
+    startY: positionThirdTableDynamic + 2.5,
+    head: [['Actividades Relacionadas No Relacionadas']], // Encabezado de la tercera tabla
+    body: dataThirdTable,
+    theme: 'grid', // Estilo de la tabla
+    margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado   
+    styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+    headerStyles: {
+      textColor: '#000',
+      fillColor: [200, 200, 200], // Color gris (F4F4F4)
+    },
+    columnWidth: 'auto', // Ancho automático para la primera columna
+    didDrawPage: function () {
+      drawHeader(doc);
+      drawBorders(doc);
+    }
+  });
+}
+  }
 
       doc.save("informacion.pdf");
     }

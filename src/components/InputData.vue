@@ -406,6 +406,7 @@ export default {
           fillColor: [200, 200, 200], // Color gris (F4F4F4)
         },
         columnWidth: 'auto', // Anchura automática para la primera columna
+        
       });
       // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
       let dataSecondTable = [];
@@ -426,34 +427,38 @@ export default {
     doc.line(5, positionSecondTableDynamic - 4, doc.internal.pageSize.width - 5, positionSecondTableDynamic - 4); // línea de separación de equipos
     doc.text("EQUIPOS", 96, positionSecondTableDynamic);
     doc.line(5, positionSecondTableDynamic + 2, doc.internal.pageSize.width - 5, positionSecondTableDynamic + 2); // línea de separación de equipos
-    let positionThirdTableDynamic = positionSecondTableDynamic + 10; // Incrementa el espacio entre tablas
+    if (positionSecondTableDynamic + 20 > doc.internal.pageSize.height) {
+      doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
+      positionSecondTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
+    }
 
-  // Verificar si hay suficiente espacio en la página actual para mostrar la tercera tabla
-  if (positionThirdTableDynamic + 20 > doc.internal.pageSize.height) {
-    doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
-    positionThirdTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
+    let positionThirdTableDynamic = positionSecondTableDynamic + 14; // Incrementa el espacio entre tablas
+
+// Verificar si hay suficiente espacio en la página actual para mostrar la tercera tabla
+if (positionThirdTableDynamic + 20 > doc.internal.pageSize.height) {
+  doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
+  positionThirdTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
+}
+
+doc.autoTable({
+  startY: positionSecondTableDynamic + 2.5,
+  head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']], // Encabezado de la segunda tabla
+  body: dataSecondTable,
+  theme: 'grid', // Estilo de la tabla
+  margin: { left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
+  styles: { fontSize: 8 }, // Estilo de fuente para la tabla
+  headerStyles: {
+    textColor: '#000',
+    fillColor: [200, 200, 200], // Color gris (F4F4F4)
+  },
+  columnWidth: 'auto',
+  didDrawPage: function () {
+    drawHeader(doc);
+    drawBorders(doc);
   }
+});
 
-    doc.autoTable({
-      startY: positionSecondTableDynamic + 2.5,
-      head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']], // Encabezado de la segunda tabla
-      body: dataSecondTable,
-      theme: 'grid', // Estilo de la tabla
-      margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
-      styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-      headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200], // Color gris (F4F4F4)
-      },
-      columnWidth: 'auto',
-      didDrawPage: function () {
-            drawHeader(doc);
-            drawBorders(doc);
-          }
-    });
-
-    // Verificar si hay datos para la tercera tabla antes de agregarla al PDF
-   // Verificar si hay datos para la tercera tabla antes de agregarla al PDF
+// Verificar si hay datos para la tercera tabla antes de agregarla al PDF
 let dataThirdTable = [];
 if (this.ActividadesRelacionadasNR_O.length > 0) {
   dataThirdTable = this.ActividadesRelacionadasNR_O.map(item => [
@@ -463,11 +468,11 @@ if (this.ActividadesRelacionadasNR_O.length > 0) {
 
 if (dataThirdTable.length > 0) {
   // Calcular la posición de inicio de la tercera tabla
-  const heightSecondTable = 2 + dataSecondTable.length * 6.8; // Calcular la altura de la segunda tabla
-  let positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 12; // Agregar un espacio entre tablas
+  const heightSecondTable = dataSecondTable.length; // Calcular la altura de la segunda tabla
+  let positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 30; // Agregar un espacio entre tablas
   const heightRequired = 20; // Altura requerida para el título y al menos una fila de la tabla
   const remainingHeight = doc.internal.pageSize.height - positionThirdTableDynamic;
-  
+
   // Verificar si hay espacio suficiente en la página actual para la tercera tabla
   if (remainingHeight < heightRequired) {
     // No hay suficiente espacio, agregar una nueva página

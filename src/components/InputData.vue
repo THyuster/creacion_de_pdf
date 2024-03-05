@@ -61,6 +61,22 @@
         <label for="referenciaEquipo">Referencia</label>
         <input type="text" id="referenciaEquipo" name="referenciaEquipo" v-model="referenciaEquipo" placeholder="referencia">
       </div>
+      <div>
+        <label for="inspeccionEquipo">Inspección</label>
+        <input type="text" id="inspeccionEquipo" name="inspeccionEquipo" v-model="inspeccionEquipo" placeholder="inspección">
+      </div>
+      <div>
+        <label for="estadoEquipo">Estado</label>
+        <select name="estadoEquipo" id="estadoEquipo" v-model="estadoEquipo">
+          <option value="">Estado</option>
+          <option value="Bueno">Bueno</option>
+          <option value="Malo">Malo</option>
+        </select>
+      </div>
+      <div>
+        <label for="observacionesEquipo">Observaciones equipo</label>
+        <input type="text" id="observacionesEquipo" name="observacionesEquipo" v-model="observacionesEquipo" placeholder="observaciones a Equipo">
+      </div>
     </div>
   </div>
   <div class="contenedor_2">
@@ -134,7 +150,7 @@
           <td>{{ item.mantenimiento }}</td>
           <td>{{ item.vidaUtil }}</td>
           <td>{{ item.reposicion }}</td>
-          <td> {{ item.disposicionFinal}}</td>
+          <td>{{ item.disposicionFinal }}</td>
         </tr>
       </tbody>
     </table>
@@ -174,6 +190,26 @@
       </tbody>
     </table>
     <p v-else>No hay datos para mostrar en la segunda tabla.</p>
+
+    <table v-if="itemsInspeccionEquipos.length > 0">
+      <thead>
+        <tr>
+          <th colspan="4">Inspección equipo</th>
+        </tr>
+        <tr>
+          <th>Inspección</th>
+          <th>Estado</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(itemInspeccionEq, index) in itemsInspeccionEquipos" :key="index">
+          <td>{{ itemInspeccionEq.inspeccionEquipo }}</td>
+          <td>{{ itemInspeccionEq.estadoEquipo }}</td>
+          <td>{{ itemInspeccionEq.observacionesEquipo }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 <script>
@@ -193,13 +229,22 @@ export default {
       vidaUtil: "fhd",
       reposicion: "fdhd",
       disposicionFinal: "g",
+      UPM: "1234567890",
+      fecha: "04/03/2024",
+      hora: "04:30 p.m.",
+      marca: "Ferrari",
+      activos_fijos: "No activo",
       cambioEquipo: 'bifo',
       realizadoEquipo: 'si',
       cantidadEquipo: '43634',
       referenciaEquipo: 'sdsg',
       Actividades_relacionadasNR: '',
+      inspeccionEquipo: 'rgw',
+      estadoEquipo: 'Bueno',
+      observacionesEquipo: 'ninguna',
       items: [],
       itemsEquipos: [],
+      itemsInspeccionEquipos: [],
       ActividadesRelacionadasNR_O: [],
       itemsPerPage: 30,
     };
@@ -219,12 +264,21 @@ export default {
         disposicionFinal: this.disposicionFinal,
       });
       if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
+      if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
         this.itemsEquipos.push({
           cambioEquipo: this.cambioEquipo,
           realizadoEquipo: this.realizadoEquipo,
           cantidadEquipo: this.cantidadEquipo,
           referenciaEquipo: this.referenciaEquipo,
         });
+      }
+      if (this.inspeccionEquipo || this.estadoEquipo || this.observacionesEquipo) {
+        this.itemsInspeccionEquipos.push({
+          inspeccionEquipo: this.inspeccionEquipo,
+          estadoEquipo: this.estadoEquipo,
+          observacionesEquipo: this.observacionesEquipo,
+        });
+      }  
       if (this.Actividades_relacionadasNR){
         this.ActividadesRelacionadasNR_O.push({
           Actividades_relacionadasNR: this.Actividades_relacionadasNR
@@ -249,38 +303,26 @@ export default {
       this.realizadoEquipo = "si";
       this.cantidadEquipo = "43567";
       this.referenciaEquipo = "aifguk";
+      this.inspeccionEquipo = "referencia";
+      this.estadoEquipo = "bueno";
+      this.observacionesEquipo = "aaaa";
       this.Actividades_relacionadasNR = "gg";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
-      const doc = new jsPDF.default();
+    const doc = new jsPDF.default();
 
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.2);
-      doc.setFontSize(8);
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    doc.setFontSize(8);
 
-      this.items.forEach(item => {
-        if (item.hora && item.fecha && item.mantenimiento_realizado) {
-          fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
-        }
-      });
-
-      // const pageWidth = doc.internal.pageSize.getWidth();
-      // const pageHeight = doc.internal.pageSize.getHeight();
-
-      // // Calcular el centro de la página
-      // const centerX = pageWidth / 2;
-      // const centerY = pageHeight / 2;
-      // console.log("El centro de la página es: (" + centerX + ", " + centerY + ")");
-
-
-      // Función para dibujar los márgenes de la página
-      function drawBorders(doc) {
+    // Función para dibujar los márgenes de la página
+    function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
-      }
+    }
 
       function generarCodigoFactura() {
         const caracteres = '1234567890';
@@ -322,16 +364,15 @@ export default {
       }
 
       function generarSerial() {
-            const caracteres = 'ABC1234567890';
-            const longitud = 6;
-            let serial = '';
-            for (let i = 0; i < longitud; i++) {
-              const indice = Math.floor(Math.random() * caracteres.length);
-              serial += caracteres.charAt(indice);
-            }
-            return serial;
-          }
-        
+        const caracteres = 'ABC1234567890';
+        const longitud = 6;
+        let serial = '';
+        for (let i = 0; i < longitud; i++) {
+          const indice = Math.floor(Math.random() * caracteres.length);
+          serial += caracteres.charAt(indice);
+        }
+        return serial;
+      }      
 
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
@@ -339,13 +380,13 @@ export default {
       const marca = this.marca;
       fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
 
-      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado){
-        doc.text("Hora: ", 122, 46);
-        doc.text(`${hora}`, 130, 46);
-        doc.text("Fecha: ", 65, 46);
-        doc.text(`${fecha}`, 75, 46);
-        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' :'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
-        doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46);
+      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado) {
+        doc.text("Hora: ", 122, 46.5);
+        doc.text(`${hora}`, 130, 46.5);
+        doc.text("Fecha: ", 65, 46.5);
+        doc.text(`${fecha}`, 75, 46.5);
+        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
+        doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46.5);
       }
       const UPM = this.UPM;
       const activos_fijos = this.activos_fijos;
@@ -362,7 +403,7 @@ export default {
         doc.text("Serial: ", 8, 40);
         const codigoSerial = generarSerial();
         doc.text(codigoSerial, 180, 40);
-        doc.text("Actividades Realizados e Insumos Utilizados", 75, 53);
+        doc.text("Actividades Realizadas e Insumos Utilizados", 75, 53);
         doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
         doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
@@ -378,48 +419,56 @@ export default {
       drawBorders(doc);
       drawHeader(doc);
       // Guardar la posición y el número de página actual
-      
+      const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
-      // Calcular la posición de inicio de la segunda tabla
-      const positionFirstTable = 61.5;
-      const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
+    // Calcular la posición de inicio de la primera tabla
+    const positionFirstTable = 61.5;
+    const heightFirstTable = this.items.length * 6.8;
 
-      doc.autoTable({
-        startY: positionFirstTable,
-        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']], // Encabezado de la tabla
-        body: this.items.map(item => [
-          item.nombreEpp,
-          item.parteCuerpoProteger,
-          item.riesgoControlado,
-          item.cargoAsociado,
-          item.especificacionTecnica,
-          item.mantenimiento,
-          item.vidaUtil,
-          item.reposicion,
-          item.disposicionFinal,
-        ]),
-        theme: 'grid', // Estilo de la tabla
-        margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
-        styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-        headerStyles: {
-          textColor: '#000',
-          fillColor: [200, 200, 200], // Color gris (F4F4F4)
-        },
-        columnWidth: 'auto', // Anchura automática para la primera columna
-        
-      });
-      // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
-      let dataSecondTable = [];
-  if (this.itemsEquipos.length > 0) {
-    dataSecondTable = this.itemsEquipos.map(itemEq => [
-      itemEq.cambioEquipo,
-      itemEq.realizadoEquipo,
-      itemEq.cantidadEquipo,
-      itemEq.referenciaEquipo,
-    ]);
-  }
+    // Dibujar la primera tabla
+    doc.autoTable({
+    startY: positionFirstTable,
+    head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']],
+    body: this.items.map(item => [
+        item.nombreEpp,
+        item.parteCuerpoProteger,
+        item.riesgoControlado,
+        item.cargoAsociado,
+        item.especificacionTecnica,
+        item.mantenimiento,
+        item.vidaUtil,
+        item.reposicion,
+        item.disposicionFinal,
+    ]),
+    theme: 'grid',
+    margin: { top: 28.5, left: 5.5, right: 5.5 },
+    styles: { fontSize: 8 },
+    headerStyles: {
+        textColor: '#000',
+        fillColor: [200, 200, 200],
+    },
+    columnWidth: 'auto',
+    didDrawPage: function (data) {
+            drawHeader(doc); // Dibujar encabezado en la última página
+        }
+    },
+    willDrawCell: function (hookData) {
+        const pageHeight = doc.internal.pageSize.height;
+        const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+        if (y > pageHeight - 20) { // Verificar si se excede el límite de la página
+            hookData.addPage(); // Agregar nueva página
+        }
+});
 
-  
+    // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
+    let dataSecondTable = [];
+    if (this.itemsEquipos.length > 0) {
+        dataSecondTable = this.itemsEquipos.map(itemEq => [
+            itemEq.cambioEquipo,
+            itemEq.realizadoEquipo,
+            itemEq.cantidadEquipo,
+            itemEq.referenciaEquipo,
+        ]);
 
   if (dataSecondTable.length > 0) {
     // Calcular la posición de inicio de la segunda tabla
@@ -440,75 +489,81 @@ if (positionThirdTableDynamic + 20 > doc.internal.pageSize.height) {
   positionThirdTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
 }
 
-doc.autoTable({
-  startY: positionSecondTableDynamic + 2.5,
-  head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']], // Encabezado de la segunda tabla
-  body: dataSecondTable,
-  theme: 'grid', // Estilo de la tabla
-  margin: { left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado
-  styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-  headerStyles: {
-    textColor: '#000',
-    fillColor: [200, 200, 200], // Color gris (F4F4F4)
-  },
-  columnWidth: 'auto',
-  didDrawPage: function () {
-    drawHeader(doc);
-    drawBorders(doc);
-  }
-});
+            doc.autoTable({
+                startY: positionSecondTableDynamic,
+                head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']],
+                body: dataSecondTable,
+                theme: 'grid',
+                margin: { top: 28.5, left: 5.5, right: 5.5 },
+                styles: { fontSize: 8 },
+                headerStyles: {
+                    textColor: '#000',
+                    fillColor: [200, 200, 200],
+                },
+                columnWidth: 'auto',
+                didDrawPage: function () {
+                    const totalPages = doc.internal.getNumberOfPages();
+                    if (totalPages > pagePosition) {
+                        drawHeader(doc);
+                        drawBorders(doc);
+                    }
+                },
+                willDrawCell: function (hookData) {
+            const pageHeight = doc.internal.pageSize.height;
+            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
+                hookData.addPage();
+            }
+        }
+            });
 
-// Verificar si hay datos para la tercera tabla antes de agregarla al PDF
-let dataThirdTable = [];
-if (this.ActividadesRelacionadasNR_O.length > 0) {
-  dataThirdTable = this.ActividadesRelacionadasNR_O.map(item => [
-    item.Actividades_relacionadasNR,
-  ]);
-}
+            // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
+            let dataThirdTable = [];
+            if (this.itemsInspeccionEquipos.length > 0) {
+                dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
+                    itemInspeccionEq.inspeccionEquipo,
+                    itemInspeccionEq.estadoEquipo,
+                    itemInspeccionEq.observacionesEquipo,
+                ]);
 
-if (dataThirdTable.length > 0) {
-  // Calcular la posición de inicio de la tercera tabla
-  const heightSecondTable = dataSecondTable.length; // Calcular la altura de la segunda tabla
-  let positionThirdTableDynamic = positionSecondTableDynamic + heightSecondTable + 30; // Agregar un espacio entre tablas
-  const heightRequired = 20; // Altura requerida para el título y al menos una fila de la tabla
-  const remainingHeight = doc.internal.pageSize.height - positionThirdTableDynamic;
+                if (dataThirdTable.length > 0) {
+                    // Calcular la altura de la segunda tabla
+                    // const heightSecondTable = 2 + dataSecondTable.length * 6.8;
+                    const positionThirdTableDynamic = positionSecondTableDynamic + 26; // Ajustar la posición aquí
 
-  // Verificar si hay espacio suficiente en la página actual para la tercera tabla
-  if (remainingHeight < heightRequired) {
-    // No hay suficiente espacio, agregar una nueva página
-    doc.addPage(); // Pasar a la siguiente página
-    drawBorders(doc); // Dibujar los márgenes en la nueva página
-    drawHeader(doc); // Dibujar el encabezado en la nueva página
-    positionSecondTableDynamic = 28.5; // Restablecer la posición de inicio de la segunda tabla en la nueva página
-    positionThirdTableDynamic = positionSecondTableDynamic + 12; // Establecer la posición de inicio de la tercera tabla en la nueva página
-  }
-
-  doc.line(5, positionThirdTableDynamic - 4, doc.internal.pageSize.width - 5, positionThirdTableDynamic - 4); // línea de separación de la tercera tabla
-  doc.text("ACTIVIDADES RELACIONADAS", 85, positionThirdTableDynamic);
-  doc.line(5, positionThirdTableDynamic + 2, doc.internal.pageSize.width - 5, positionThirdTableDynamic + 2); // línea de separación de la tercera tabla
-
-  // Agregar la tercera tabla al PDF
-  doc.autoTable({
-    startY: positionThirdTableDynamic + 2.5,
-    head: [['Actividades Relacionadas No Relacionadas']], // Encabezado de la tercera tabla
-    body: dataThirdTable,
-    theme: 'grid', // Estilo de la tabla
-    margin: { top: 28.5, left: 5.5, right: 5.5 }, // Margen superior para evitar que se solape con el encabezado   
-    styles: { fontSize: 8 }, // Estilo de fuente para la tabla
-    headerStyles: {
-      textColor: '#000',
-      fillColor: [200, 200, 200], // Color gris (F4F4F4)
-    },
-    columnWidth: 'auto', // Ancho automático para la primera columna
-    didDrawPage: function () {
-      drawHeader(doc);
-      drawBorders(doc);
+                    doc.autoTable({
+                        startY: positionThirdTableDynamic,
+                        head: [['Inspección', 'Estado', 'Observaciones']],
+                        body: dataThirdTable,
+                        theme: 'grid',
+                        margin: { top: 28.5, left: 5.5, right: 5.5 },
+                        styles: { fontSize: 8 },
+                        headerStyles: {
+                            textColor: '#000',
+                            fillColor: [200, 200, 200],
+                        },
+                        columnWidth: 'auto',
+                        didDrawPage: function () {
+                            const totalPages = doc.internal.getNumberOfPages();
+                            if (totalPages > pagePosition) {
+                                drawHeader(doc);
+                                drawBorders(doc);
+                            }
+                        },
+                        willDrawCell: function (hookData) {
+            const pageHeight = doc.internal.pageSize.height;
+            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
+            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
+                hookData.addPage();
+            }
+        }
+                    });
+                }
+            }
+        }
     }
-  });
-}
-  }
 
-      doc.save("informacion.pdf");
+    doc.save("informacion.pdf");
     }
   }
 }

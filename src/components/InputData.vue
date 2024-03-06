@@ -281,19 +281,25 @@ export default {
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
-    const doc = new jsPDF.default();
+      const doc = new jsPDF.default();
 
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.2);
-    doc.setFontSize(8);
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.2);
+      doc.setFontSize(8);
 
-    // Función para dibujar los márgenes de la página
-    function drawBorders(doc) {
+      this.items.forEach(item => {
+        if (item.hora && item.fecha && item.mantenimiento_realizado) {
+          fechahoramatenimientoR(doc, item.hora, item.fecha, item.mantenimiento_realizado);
+        }
+      });
+
+      // Función para dibujar los márgenes de la página
+      function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
         doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
         doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
-    }
+      }
 
       function generarCodigoFactura() {
         const caracteres = '1234567890';
@@ -374,44 +380,49 @@ export default {
         doc.text("Serial: ", 8, 40);
         const codigoSerial = generarSerial();
         doc.text(codigoSerial, 180, 40);
-        doc.text("Actividades Realizadas e Insumos Utilizados", 75, 53);
-        doc.text("Caja de Control", 93, 59)
         doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
         doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
         doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
         doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado
         doc.line(62, 49, 62, doc.internal.pageSize.height - 255); //linea vertical que separa mantenimiento realizado con la fecha
-        doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas
-        doc.line(5, 55, doc.internal.pageSize.width - 5, 55); // separacion de titulo 1
-        doc.line(5, 61, doc.internal.pageSize.width - 5, 61); // separacion de titulo 2
+        doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas        
       }
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
-      // Guardar la posición y el número de página actual
-      const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
-    // Calcular la posición de inicio de la primera tabla
-    const positionFirstTable = 61.5;
-    const heightFirstTable = 2 + this.items.length * 6.8;
+      // Calcular la posición de inicio de la segunda tabla
+      const positionFirstTable = 49.5;
+      const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
 
-    // Dibujar la primera tabla
+            // Llamada a la función drawFirstTable con this.items como argumento
+      drawFirstTable(this.items);
+
+      // Llamada a la función drawSecondTable con this.itemsEquipos como argumento
+      drawSecondTable(this.itemsEquipos);
+
+// Función para dibujar la primera tabla
+function drawFirstTable(items) {
+const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
     doc.autoTable({
         startY: positionFirstTable,
-        head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']],
-        body: this.items.map(item => [
-            item.nombreEpp,
-            item.parteCuerpoProteger,
-            item.riesgoControlado,
-            item.cargoAsociado,
-            item.especificacionTecnica,
-            item.mantenimiento,
-            item.vidaUtil,
-            item.reposicion,
-            item.disposicionFinal,
+        head: [
+            [{content: 'Caja de control', colSpan: 9, styles: {halign: 'center'}}],
+            ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']
+        ],
+        body: items.map(item => [
+          item.nombreEpp,
+          item.parteCuerpoProteger,
+          item.riesgoControlado,
+          item.cargoAsociado,
+          item.especificacionTecnica,
+          item.mantenimiento,
+          item.vidaUtil,
+          item.reposicion,
+          item.disposicionFinal,
         ]),
-        theme: 'grid',
+        theme: 'striped',
         margin: { top: 28.5, left: 5.5, right: 5.5 },
         styles: { fontSize: 8 },
         headerStyles: {
@@ -420,113 +431,57 @@ export default {
         },
         columnWidth: 'auto',
         didDrawPage: function () {
-            const totalPages = doc.internal.getNumberOfPages();
-            if (totalPages > pagePosition) {
-                drawHeader(doc);
-                drawBorders(doc);
-            }
-        },
-        willDrawCell: function (hookData) {
-            const pageHeight = doc.internal.pageSize.height;
-            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
-                hookData.addPage();
-            }
-        }
-    });
-
-    // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
-    let dataSecondTable = [];
-    if (this.itemsEquipos.length > 0) {
-        dataSecondTable = this.itemsEquipos.map(itemEq => [
-            itemEq.cambioEquipo,
-            itemEq.realizadoEquipo,
-            itemEq.cantidadEquipo,
-            itemEq.referenciaEquipo,
-        ]);
-
-        if (dataSecondTable.length > 0) {
-            // Calcular la posición de inicio de la segunda tabla
-            const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 6; // Ajustar la posición aquí
-
-            doc.autoTable({
-                startY: positionSecondTableDynamic,
-                head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']],
-                body: dataSecondTable,
-                theme: 'grid',
-                margin: { top: 28.5, left: 5.5, right: 5.5 },
-                styles: { fontSize: 8 },
-                headerStyles: {
-                    textColor: '#000',
-                    fillColor: [200, 200, 200],
-                },
-                columnWidth: 'auto',
-                didDrawPage: function () {
-                    const totalPages = doc.internal.getNumberOfPages();
-                    if (totalPages > pagePosition) {
-                        drawHeader(doc);
-                        drawBorders(doc);
-                    }
-                },
-                willDrawCell: function (hookData) {
-            const pageHeight = doc.internal.pageSize.height;
-            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
-                hookData.addPage();
-            }
-        }
-            });
-
-            // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
-            let dataThirdTable = [];
-            if (this.itemsInspeccionEquipos.length > 0) {
-                dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
-                    itemInspeccionEq.inspeccionEquipo,
-                    itemInspeccionEq.estadoEquipo,
-                    itemInspeccionEq.observacionesEquipo,
-                ]);
-
-                if (dataThirdTable.length > 0) {
-                    // Calcular la altura de la segunda tabla
-                    // const heightSecondTable = 2 + dataSecondTable.length * 6.8;
-                    const positionThirdTableDynamic = positionSecondTableDynamic + 26; // Ajustar la posición aquí
-
-                    doc.autoTable({
-                        startY: positionThirdTableDynamic,
-                        head: [['Inspección', 'Estado', 'Observaciones']],
-                        body: dataThirdTable,
-                        theme: 'grid',
-                        margin: { top: 28.5, left: 5.5, right: 5.5 },
-                        styles: { fontSize: 8 },
-                        headerStyles: {
-                            textColor: '#000',
-                            fillColor: [200, 200, 200],
-                        },
-                        columnWidth: 'auto',
-                        didDrawPage: function () {
-                            const totalPages = doc.internal.getNumberOfPages();
-                            if (totalPages > pagePosition) {
-                                drawHeader(doc);
-                                drawBorders(doc);
-                            }
-                        },
-                        willDrawCell: function (hookData) {
-            const pageHeight = doc.internal.pageSize.height;
-            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
-                hookData.addPage();
-            }
-        }
-                    });
+                const totalPages = doc.internal.getNumberOfPages();
+                if (totalPages > pagePosition) {
+                    drawHeader(doc);
+                    drawBorders(doc);
                 }
-            }
-        }
-    }
+            }        
+    });
+}
 
+// Función para dibujar la segunda tabla
+function drawSecondTable(itemsEquipos) {
+const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+    if (itemsEquipos.length > 0) {
+        const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12;
+        doc.autoTable({
+            startY: positionSecondTableDynamic + 2.5,
+            head: [
+                [{content: 'Equipos', colSpan: 4, styles: {halign: 'center'}}],
+                ['Cambio', 'Realizado', 'Cantidad', 'Referencia']
+            ],
+            body: itemsEquipos.map(itemEq => [
+                itemEq.cambioEquipo,
+                itemEq.realizadoEquipo,
+                itemEq.cantidadEquipo,
+                itemEq.referenciaEquipo,
+            ]),
+            theme: 'striped',
+            margin: { top: 28.5, left: 5.5, right: 5.5 },
+            styles: { fontSize: 8 },
+            headerStyles: {
+                textColor: '#000',
+                fillColor: [200, 200, 200],
+            },
+            columnWidth: 'auto',
+            didDrawPage: function () {
+                const totalPages = doc.internal.getNumberOfPages();
+                if (totalPages > pagePosition) {
+                    drawHeader(doc);
+                    drawBorders(doc);
+                }
+            } 
+        });
+    }
+}
+
+    // Guardar el documento
     doc.save("informacion.pdf");
     }
   }
 }
+
 </script>
 
 <style>

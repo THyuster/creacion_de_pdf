@@ -6,17 +6,7 @@
 
 <script>
 import InputData from './components/InputData.vue';
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
-//Junior
+
 export default {
   name: 'App',
   components: {

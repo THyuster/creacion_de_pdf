@@ -262,8 +262,11 @@ export default {
         vidaUtil: this.vidaUtil,
         reposicion: this.reposicion,
         disposicionFinal: this.disposicionFinal,
+        UPM: this.UPM,
+        fecha: this.fecha,
+        hora: this.hora,
+        activos_fijos: this.activos_fijos,
       });
-      if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
       if (this.cambioEquipo || this.realizadoEquipo || this.cantidadEquipo || this.referenciaEquipo) {
         this.itemsEquipos.push({
           cambioEquipo: this.cambioEquipo,
@@ -271,7 +274,6 @@ export default {
           cantidadEquipo: this.cantidadEquipo,
           referenciaEquipo: this.referenciaEquipo,
         });
-      }
       if (this.inspeccionEquipo || this.estadoEquipo || this.observacionesEquipo) {
         this.itemsInspeccionEquipos.push({
           inspeccionEquipo: this.inspeccionEquipo,
@@ -309,262 +311,179 @@ export default {
       this.Actividades_relacionadasNR = "gg";
     },
     async generarPDF() {
-      const jsPDF = await import('jspdf');
-    const doc = new jsPDF.default();
+  const jsPDF = await import('jspdf');
+  const doc = new jsPDF.default();
 
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.2);
-    doc.setFontSize(8);
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.2);
+  doc.setFontSize(8);
 
-    // Función para dibujar los márgenes de la página
-    function drawBorders(doc) {
-        doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
-        doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
-        doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
-        doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
+  function drawBorders(doc) {
+    doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
+    doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
+    doc.line(5, 292, doc.internal.pageSize.width - 5, 292);
+    doc.line(205, 5, 205, doc.internal.pageSize.height - 5);
+  }
+
+  function generarCodigoFactura() {
+    const caracteres = '1234567890';
+    const longitud = 6;
+    let codigo = '';
+    for (let i = 0; i < longitud; i++) {
+      const indice = Math.floor(Math.random() * caracteres.length);
+      codigo += caracteres.charAt(indice);
     }
+    return codigo;
+  }
 
-      function generarCodigoFactura() {
-        const caracteres = '1234567890';
-        const longitud = 6;
-        let codigo = '';
-        for (let i = 0; i < longitud; i++) {
-          const indice = Math.floor(Math.random() * caracteres.length);
-          codigo += caracteres.charAt(indice);
-        }
-        return codigo;
-      }
+  function drawHeader(doc) {
+    doc.addImage(imagenData, 'PNG', 6, 6, 40, 20);
+    doc.text('Direccion De Mantenimiento', 65, 13)
+    doc.text('Actas De Mantenimiento Electrico', 61, 23)
+    doc.text('NIT', 138, 9);
+    doc.text('123456789-0', 132, 15);
+    doc.text('Código de Factura', 130, 21);
+    const codigoFactura = generarCodigoFactura();
+    doc.text(codigoFactura, 135, 27);
+    const fechaActual = new Date().toLocaleDateString();
+    doc.text('Fecha', 177, 21)
+    doc.text(`${fechaActual}`, 175, 27);
+    const totalPages = doc.internal.getNumberOfPages();
+    doc.text('Página', 176, 9)
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.text(`${i}`, doc.internal.pageSize.width - 30, 15);
+    }
+    doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
+    doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
+    doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
+    doc.line(120, 5, 120, doc.internal.pageSize.height - 269);
+    doc.line(120, 11, doc.internal.pageSize.width - 5, 11);
+    doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
+    doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
+  }
 
-      // Dibujar el encabezado
-      function drawHeader(doc) {
-        doc.addImage(imagenData, 'PNG', 6, 6, 40, 20);
-        doc.text('Direccion De Mantenimiento', 65, 13)
-        doc.text('Actas De Mantenimiento Electrico', 61, 23)
-        doc.text('NIT', 138, 9);
-        doc.text('123456789-0', 132, 15);
-        doc.text('Código de Factura', 130, 21);
-        const codigoFactura = generarCodigoFactura(); // Generar código de factura
-        doc.text(codigoFactura, 135, 27);// doc.setPage(1);
-        const fechaActual = new Date().toLocaleDateString();
-        doc.text('Fecha', 177, 21)
-        doc.text(`${fechaActual}`, 175, 27);
-        const totalPages = doc.internal.getNumberOfPages();
-        doc.text('Página', 176, 9)
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15);
-        }
-        doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
-        doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
-        doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
-        doc.line(120, 5, 120, doc.internal.pageSize.height - 269);
-        doc.line(120, 11, doc.internal.pageSize.width - 5, 11);
-        doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
-        doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
-      }
+  function generarSerial() {
+    const caracteres = 'ABC1234567890';
+    const longitud = 6;
+    let serial = '';
+    for (let i = 0; i < longitud; i++) {
+      const indice = Math.floor(Math.random() * caracteres.length);
+      serial += caracteres.charAt(indice);
+    }
+    return serial;
+  }
 
-      function generarSerial() {
-        const caracteres = 'ABC1234567890';
-        const longitud = 6;
-        let serial = '';
-        for (let i = 0; i < longitud; i++) {
-          const indice = Math.floor(Math.random() * caracteres.length);
-          serial += caracteres.charAt(indice);
-        }
-        return serial;
-      }      
+  function fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca) {
+    doc.text("Hora: ", 122, 46.5);
+    doc.text(`${hora}`, 130, 46.5);
+    doc.text("Fecha: ", 65, 46.5);
+    doc.text(`${fecha}`, 75, 46.5);
+    const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : '';
+    doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46.5);
+    doc.text("Marca:", 122, 33);
+    doc.text(`${marca}`, 132, 33);
+  }
 
-      const mantenimiento_realizado = this.mantenimiento_realizado;
-      const fecha = this.fecha;
-      const hora = this.hora;
-      const marca = this.marca;
-      fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
+  function drawEncabezado(doc, UPM, activos_fijos, marca) {
+    doc.text("UPM:", 8, 33);
+    doc.text(`${UPM}`, 16, 33);
+    doc.text("Activo Fija:", 34, 33);
+    doc.text(`${activos_fijos}`, 49, 33);
+    doc.text("Marca", 122, 33);
+    doc.text(`${marca}`,132, 33)
+    doc.text("Serial: ", 8, 40);
+    const codigoSerial = generarSerial();
+    doc.text(codigoSerial, 180, 40);
+    doc.line(5, 35, doc.internal.pageSize.width - 5, 35);
+    doc.line(33, 28, 33, doc.internal.pageSize.height - 262);
+    doc.line(120, 28, 120, doc.internal.pageSize.height - 262);
+    doc.line(5, 42, doc.internal.pageSize.width - 5, 42);
+    doc.line(5, 49, doc.internal.pageSize.width - 5, 49);
+    doc.line(62, 49, 62, doc.internal.pageSize.height - 255);
+    doc.line(120, 49, 120, doc.internal.pageSize.height - 255);
+  }
 
-      function fechahoramatenimientoR (doc, hora, fecha, mantenimiento_realizado) {
-        doc.text("Hora: ", 122, 46.5);
-        doc.text(`${hora}`, 130, 46.5);
-        doc.text("Fecha: ", 65, 46.5);
-        doc.text(`${fecha}`, 75, 46.5);
-        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
-        doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46.5);
-      }
-      const UPM = this.UPM;
-      const activos_fijos = this.activos_fijos;
+  drawBorders(doc);
+  drawHeader(doc);
 
-      drawEncabezado(doc, UPM, activos_fijos, marca);
-      
-      function drawEncabezado(doc, UPM, activos_fijos, marca) {
-        doc.text("UPM:", 8, 33);
-        doc.text(`${UPM}`, 16, 33);
-        doc.text("Activo Fija:", 34, 33);
-        doc.text(`${activos_fijos}`, 49, 33);
-        doc.text("Marca:", 122, 33);
-        doc.text(`${marca}`, 132, 33);
-        doc.text("Serial: ", 8, 40);
-        const codigoSerial = generarSerial();
-        doc.text(codigoSerial, 180, 40);
-        doc.text("Actividades Realizadas e Insumos Utilizados", 75, 53);
-        doc.text("Caja de Control", 93, 59)
-        doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
-        doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
-        doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
-        doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
-        doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado
-        doc.line(62, 49, 62, doc.internal.pageSize.height - 255); //linea vertical que separa mantenimiento realizado con la fecha
-        doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas
-        doc.line(5, 55, doc.internal.pageSize.width - 5, 55); // separacion de titulo 1
-        doc.line(5, 61, doc.internal.pageSize.width - 5, 61); // separacion de titulo 2
-      }
-      // Dibujar el encabezado y los márgenes en la primera página
-      drawBorders(doc);
-      drawHeader(doc);
-      // Guardar la posición y el número de página actual
-      const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+  const mantenimiento_realizado = this.mantenimiento_realizado;
+  const fecha = this.fecha;
+  const hora = this.hora;
+  const marca = this.marca;
+  fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado, marca);
 
-    // Calcular la posición de inicio de la primera tabla
-    const positionFirstTable = 61.5;
-    const heightFirstTable = this.items.length * 6.8;
+  const UPM = this.UPM;
+  const activos_fijos = this.activos_fijos;
 
-    // Dibujar la primera tabla
-    doc.autoTable({
+  drawEncabezado(doc, UPM, activos_fijos, marca);
+
+  const positionFirstTable = 49.5;
+  let heightFirstTable = 1;
+
+  doc.autoTable({
     startY: positionFirstTable,
-    head: [['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']],
+    head: [
+      [{ content: 'Caja De Control', colSpan: 9, styles: { halign: 'center' } }], // Cambiado el colSpan a 9 para que coincida con la cantidad de columnas
+      ['Nombre EPP', 'Parte Cuerpo Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final'] // Ajustado el contenido del encabezado para que coincida con el contenido de las celdas
+    ],
     body: this.items.map(item => [
-        item.nombreEpp,
-        item.parteCuerpoProteger,
-        item.riesgoControlado,
-        item.cargoAsociado,
-        item.especificacionTecnica,
-        item.mantenimiento,
-        item.vidaUtil,
-        item.reposicion,
-        item.disposicionFinal,
+      item.nombreEpp,
+      item.parteCuerpoProteger,
+      item.riesgoControlado,
+      item.cargoAsociado,
+      item.especificacionTecnica,
+      item.mantenimiento,
+      item.vidaUtil,
+      item.reposicion,
+      item.disposicionFinal,
     ]),
     theme: 'grid',
     margin: { top: 28.5, left: 5.5, right: 5.5 },
     styles: { fontSize: 8 },
     headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200],
+      textColor: '#000',
+      fillColor: [200, 200, 200],
     },
     columnWidth: 'auto',
     didDrawPage: function (data) {
-            drawHeader(doc); // Dibujar encabezado en la última página
-        }
-    },
-    willDrawCell: function (hookData) {
-        const pageHeight = doc.internal.pageSize.height;
-        const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-        if (y > pageHeight - 20) { // Verificar si se excede el límite de la página
-            hookData.addPage(); // Agregar nueva página
-        }
-});
+      heightFirstTable = data.table.height; // Obtener la altura de la primera tabla
+      drawHeader(doc);
+    }
+  });
 
-    // Verificar si hay datos en la segunda tabla antes de agregarla al PDF
-    let dataSecondTable = [];
-    if (this.itemsEquipos.length > 0) {
-        dataSecondTable = this.itemsEquipos.map(itemEq => [
-            itemEq.cambioEquipo,
-            itemEq.realizadoEquipo,
-            itemEq.cantidadEquipo,
-            itemEq.referenciaEquipo,
-        ]);
+  let dataSecondTable = [];
+  if (this.itemsEquipos.length > 0) {
+    dataSecondTable = this.itemsEquipos.map(itemEq => [
+      itemEq.cambioEquipo,
+      itemEq.realizadoEquipo,
+      itemEq.cantidadEquipo,
+      itemEq.referenciaEquipo,
+    ]);
 
-  if (dataSecondTable.length > 0) {
     // Calcular la posición de inicio de la segunda tabla
-    let positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12; // Agregar un espacio entre tablas
-    doc.line(5, positionSecondTableDynamic - 4, doc.internal.pageSize.width - 5, positionSecondTableDynamic - 4); // línea de separación de equipos
-    doc.text("EQUIPOS", 96, positionSecondTableDynamic);
-    doc.line(5, positionSecondTableDynamic + 2, doc.internal.pageSize.width - 5, positionSecondTableDynamic + 2); // línea de separación de equipos
-    if (positionSecondTableDynamic + 20 > doc.internal.pageSize.height) {
-      doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
-      positionSecondTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
-    }
+    const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12; // Agregar un espacio entre tablas
 
-    let positionThirdTableDynamic = positionSecondTableDynamic + 14; // Incrementa el espacio entre tablas
+    doc.autoTable({
+      startY: positionSecondTableDynamic,
+      head: [
+        [{ content: 'Equipos', colSpan: 4, styles: { halign: 'center' } }],
+        ['Cambio', 'Realizado', 'Cantidad', 'Referencia']
+      ],
+      body: dataSecondTable,
+      theme: 'grid',
+      margin: { top: 28.5, left: 5.5, right: 5.5 },
+      styles: { fontSize: 8 },
+      headerStyles: {
+        textColor: '#000',
+        fillColor: [200, 200, 200],
+      },
+      columnWidth: 'auto'
+    });
+  }
 
-// Verificar si hay suficiente espacio en la página actual para mostrar la tercera tabla
-if (positionThirdTableDynamic + 20 > doc.internal.pageSize.height) {
-  doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
-  positionThirdTableDynamic = 20; // Restablecer la posición de inicio en la nueva página
+  doc.save("informacion.pdf");
 }
-
-            doc.autoTable({
-                startY: positionSecondTableDynamic,
-                head: [['Cambio', 'Realizado', 'Cantidad', 'Referencia']],
-                body: dataSecondTable,
-                theme: 'grid',
-                margin: { top: 28.5, left: 5.5, right: 5.5 },
-                styles: { fontSize: 8 },
-                headerStyles: {
-                    textColor: '#000',
-                    fillColor: [200, 200, 200],
-                },
-                columnWidth: 'auto',
-                didDrawPage: function () {
-                    const totalPages = doc.internal.getNumberOfPages();
-                    if (totalPages > pagePosition) {
-                        drawHeader(doc);
-                        drawBorders(doc);
-                    }
-                },
-                willDrawCell: function (hookData) {
-            const pageHeight = doc.internal.pageSize.height;
-            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
-                hookData.addPage();
-            }
-        }
-            });
-
-            // Verificar si hay datos en la tercera tabla antes de agregarla al PDF
-            let dataThirdTable = [];
-            if (this.itemsInspeccionEquipos.length > 0) {
-                dataThirdTable = this.itemsInspeccionEquipos.map(itemInspeccionEq => [
-                    itemInspeccionEq.inspeccionEquipo,
-                    itemInspeccionEq.estadoEquipo,
-                    itemInspeccionEq.observacionesEquipo,
-                ]);
-
-                if (dataThirdTable.length > 0) {
-                    // Calcular la altura de la segunda tabla
-                    // const heightSecondTable = 2 + dataSecondTable.length * 6.8;
-                    const positionThirdTableDynamic = positionSecondTableDynamic + 26; // Ajustar la posición aquí
-
-                    doc.autoTable({
-                        startY: positionThirdTableDynamic,
-                        head: [['Inspección', 'Estado', 'Observaciones']],
-                        body: dataThirdTable,
-                        theme: 'grid',
-                        margin: { top: 28.5, left: 5.5, right: 5.5 },
-                        styles: { fontSize: 8 },
-                        headerStyles: {
-                            textColor: '#000',
-                            fillColor: [200, 200, 200],
-                        },
-                        columnWidth: 'auto',
-                        didDrawPage: function () {
-                            const totalPages = doc.internal.getNumberOfPages();
-                            if (totalPages > pagePosition) {
-                                drawHeader(doc);
-                                drawBorders(doc);
-                            }
-                        },
-                        willDrawCell: function (hookData) {
-            const pageHeight = doc.internal.pageSize.height;
-            const y = hookData.row.index * hookData.row.height + hookData.table.startY;
-            if (y > pageHeight - 20) { // 20 is a margin for the footer or other content
-                hookData.addPage();
-            }
-        }
-                    });
-                }
-            }
-        }
-    }
-
-    doc.save("informacion.pdf");
-    }
   }
 }
 </script>

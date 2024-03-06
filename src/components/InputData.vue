@@ -193,6 +193,7 @@
     </table>
   </div>
 </template>
+
 <script>
 import imagenData from '@/assets/logoMLA.png';
 import 'jspdf-autotable';
@@ -258,7 +259,6 @@ export default {
         });
       }  
       this.limpiarCampos();
-
     },
     limpiarCampos() {
       this.nombreEpp = "sdfh";
@@ -293,7 +293,6 @@ export default {
         }
       });
 
-      // Función para dibujar los márgenes de la página
       function drawBorders(doc) {
         doc.line(5, 5, doc.internal.pageSize.width - 5, 5);
         doc.line(5, 5, 5, doc.internal.pageSize.height - 5);
@@ -312,7 +311,6 @@ export default {
         return codigo;
       }
 
-      // Dibujar el encabezado
       function drawHeader(doc) {
         doc.addImage(imagenData, 'PNG', 6, 6, 40, 20);
         doc.text('Direccion De Mantenimiento', 65, 13)
@@ -320,8 +318,8 @@ export default {
         doc.text('NIT', 138, 9);
         doc.text('123456789-0', 132, 15);
         doc.text('Código de Factura', 130, 21);
-        const codigoFactura = generarCodigoFactura(); // Generar código de factura
-        doc.text(codigoFactura, 135, 27);// doc.setPage(1);
+        const codigoFactura = generarCodigoFactura();
+        doc.text(codigoFactura, 135, 27);
         const fechaActual = new Date().toLocaleDateString();
         doc.text('Fecha', 177, 21)
         doc.text(`${fechaActual}`, 175, 27);
@@ -362,7 +360,7 @@ export default {
         doc.text(`${hora}`, 130, 46.5);
         doc.text("Fecha: ", 65, 46.5);
         doc.text(`${fecha}`, 75, 46.5);
-        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : ''; // Si no se ha seleccionado ninguno, dejar en blanco
+        const tipoMantenimiento = mantenimiento_realizado ? (mantenimiento_realizado === 'Preventivo' ? 'Preventivo' : 'Correctivo') : '';
         doc.text(`Mantenimiento Realizado: ${tipoMantenimiento}`, 8, 46.5);
       }
       const UPM = this.UPM;
@@ -380,110 +378,104 @@ export default {
         doc.text("Serial: ", 8, 40);
         const codigoSerial = generarSerial();
         doc.text(codigoSerial, 180, 40);
-        doc.line(5, 35, doc.internal.pageSize.width - 5, 35); //linea de separacion de upm hacia abajo
-        doc.line(33, 28, 33, doc.internal.pageSize.height - 262); //linea vertical despues de upm
-        doc.line(120, 28, 120, doc.internal.pageSize.height - 262); //linea vertical despues de upm
-        doc.line(5, 42, doc.internal.pageSize.width - 5, 42); //linea de separacion de serial
-        doc.line(5, 49, doc.internal.pageSize.width - 5, 49); // linea de sepracion de mantenimiento realizado
-        doc.line(62, 49, 62, doc.internal.pageSize.height - 255); //linea vertical que separa mantenimiento realizado con la fecha
-        doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas        
+        doc.line(5, 35, doc.internal.pageSize.width - 5, 35);
+        doc.line(33, 28, 33, doc.internal.pageSize.height - 262);
+        doc.line(120, 28, 120, doc.internal.pageSize.height - 262);
+        doc.line(5, 42, doc.internal.pageSize.width - 5, 42);
+        doc.line(5, 49, doc.internal.pageSize.width - 5, 49);
+        doc.line(62, 49, 62, doc.internal.pageSize.height - 255);
+        doc.line(120, 49, 120, doc.internal.pageSize.height - 255);
       }
-      // Dibujar el encabezado y los márgenes en la primera página
+
       drawBorders(doc);
       drawHeader(doc);
 
-      // Calcular la posición de inicio de la segunda tabla
       const positionFirstTable = 49.5;
-      const heightFirstTable = 2 + this.items.length * 6.8; // Asumiendo una altura de fila de 10
+      const heightFirstTable = 2 + this.items.length * 6.8;
 
-            // Llamada a la función drawFirstTable con this.items como argumento
       drawFirstTable(this.items);
 
-      // Llamada a la función drawSecondTable con this.itemsEquipos como argumento
-      drawSecondTable(this.itemsEquipos);
-
-// Función para dibujar la primera tabla
-function drawFirstTable(items) {
-const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
-    doc.autoTable({
-        startY: positionFirstTable,
-        head: [
+      function drawFirstTable(items) {
+        
+        doc.autoTable({
+          startY: positionFirstTable,
+          head: [
             [{content: 'Caja de control', colSpan: 9, styles: {halign: 'center'}}],
             ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']
+          ],
+          body: items.map(item => [
+            item.nombreEpp,
+            item.parteCuerpoProteger,
+            item.riesgoControlado,
+            item.cargoAsociado,
+            item.especificacionTecnica,
+            item.mantenimiento,
+            item.vidaUtil,
+            item.reposicion,
+            item.disposicionFinal,
+          ]),
+          theme: 'striped',
+          margin: { top: 28.5, left: 5.5, right: 5.5 },
+          styles: { fontSize: 8 },
+          headerStyles: {
+            textColor: '#000',
+            fillColor: [200, 200, 200],
+          },
+          columnWidth: 'auto',
+          didDrawPage: function () {
+           
+              drawHeader(doc);
+              drawBorders(doc);
+            
+          }        
+        });
+      }
+
+      function drawSecondTable(doc, itemsEquipos, positionFirstTable, heightFirstTable) {
+  if (itemsEquipos.length > 0) {
+    const totalPages = doc.internal.getNumberOfPages();
+
+    // Función para dibujar la segunda tabla en una página específica
+    function drawTableOnPage(pageNumber) {
+      doc.setPage(pageNumber);
+      const startY = pageNumber === 1 ? heightFirstTable + 20 : 20;
+      doc.autoTable({
+        startY: startY,
+        head: [
+          [{content: 'Equipos', colSpan: 4, styles: {halign: 'center'}}],
+          ['Cambio', 'Realizado', 'Cantidad', 'Referencia']
         ],
-        body: items.map(item => [
-          item.nombreEpp,
-          item.parteCuerpoProteger,
-          item.riesgoControlado,
-          item.cargoAsociado,
-          item.especificacionTecnica,
-          item.mantenimiento,
-          item.vidaUtil,
-          item.reposicion,
-          item.disposicionFinal,
+        body: itemsEquipos.map(itemEq => [
+          itemEq.cambioEquipo,
+          itemEq.realizadoEquipo,
+          itemEq.cantidadEquipo,
+          itemEq.referenciaEquipo,
         ]),
         theme: 'striped',
         margin: { top: 28.5, left: 5.5, right: 5.5 },
         styles: { fontSize: 8 },
         headerStyles: {
-            textColor: '#000',
-            fillColor: [200, 200, 200],
+          textColor: '#000',
+          fillColor: [200, 200, 200],
         },
         columnWidth: 'auto',
-        didDrawPage: function () {
-                const totalPages = doc.internal.getNumberOfPages();
-                if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
-                }
-            }        
-    });
-}
-
-// Función para dibujar la segunda tabla
-function drawSecondTable(itemsEquipos) {
-const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
-    if (itemsEquipos.length > 0) {
-        const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12;
-        doc.autoTable({
-            startY: positionSecondTableDynamic + 2.5,
-            head: [
-                [{content: 'Equipos', colSpan: 4, styles: {halign: 'center'}}],
-                ['Cambio', 'Realizado', 'Cantidad', 'Referencia']
-            ],
-            body: itemsEquipos.map(itemEq => [
-                itemEq.cambioEquipo,
-                itemEq.realizadoEquipo,
-                itemEq.cantidadEquipo,
-                itemEq.referenciaEquipo,
-            ]),
-            theme: 'striped',
-            margin: { top: 28.5, left: 5.5, right: 5.5 },
-            styles: { fontSize: 8 },
-            headerStyles: {
-                textColor: '#000',
-                fillColor: [200, 200, 200],
-            },
-            columnWidth: 'auto',
-            didDrawPage: function () {
-                const totalPages = doc.internal.getNumberOfPages();
-                if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
-                }
-            } 
-        });
+      });
     }
-}
 
-    // Guardar el documento
-    doc.save("informacion.pdf");
+    // Dibujar la segunda tabla en todas las páginas después de la primera
+    for (let i = 2; i <= totalPages; i++) {
+      drawTableOnPage(i);
     }
   }
 }
 
+// Llama a la función drawSecondTable después de su definición
+drawSecondTable(doc, this.itemsEquipos, positionFirstTable, heightFirstTable);
+      doc.save("informacion.pdf");
+    }
+  }
+}
 </script>
-
 <style>
 .contenedor {
   display: flex;

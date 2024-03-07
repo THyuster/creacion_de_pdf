@@ -8,9 +8,12 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@pdftron/webviewer": "^10.7.2",
     "core-js": "^3.8.3",
+    "cross-fetch": "^4.0.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "pdf-lib": "^1.17.1",
     "pdfkit": "^0.14.0",
     "pdfmake": "^0.2.9",
     "vue": "^3.2.13"

@@ -53,6 +53,7 @@
           <option value="No">No</option>
         </select>
       </div>
+      
       <div>
         <label for="cantidadEquipo">Cantidad</label>
         <input type="number" id="cantidadEquipo" name="cantidadEquipo" v-model="cantidadEquipo" placeholder="cambio">

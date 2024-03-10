@@ -213,7 +213,7 @@ export default {
       UPM: "1234567890",
       fecha: "04/03/2024",
       hora: "04:30 p.m.",
-      marca: "Ferrari",
+      marca: "",
       activos_fijos: "No activo",
       cambioEquipo: 'bifo',
       realizadoEquipo: 'si',
@@ -226,6 +226,7 @@ export default {
       itemsEquipos: [],
       itemsInspeccionEquipos: [],
       itemsPerPage: 30,
+      firmaDibujada: false,
     };
   },
   methods: {
@@ -329,8 +330,8 @@ export default {
         doc.text('Página', 176, 9)
         for (let i = 1; i <= totalPages; i++) {
           doc.setPage(i);
-          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15);
-        }
+          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15); 
+      }
         doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
         doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
         doc.line(46, 5, 46, doc.internal.pageSize.height - 269);
@@ -349,7 +350,7 @@ export default {
           serial += caracteres.charAt(indice);
         }
         return serial;
-      }      
+      }    
 
       const mantenimiento_realizado = this.mantenimiento_realizado;
       const fecha = this.fecha;
@@ -388,9 +389,25 @@ export default {
         doc.line(62, 49, 62, doc.internal.pageSize.height - 255); //linea vertical que separa mantenimiento realizado con la fecha
         doc.line(120, 49, 120, doc.internal.pageSize.height - 255); //linea vertical que separa fecha con horas        
       }
+
+      function firmas (doc){
+        doc.line(5, 277.5, doc.internal.pageSize.width - 5, 277.5);
+        doc.text("Nombre De Quien Realizo El Mantenimiento:", 7, 285);
+        doc.text("Firma Del Ingeniero Supervisor:", 107, 285 );
+        doc.line(105, 277.5, 105, doc.internal.pageSize.height - 5); 
+      }
       // Dibujar el encabezado y los márgenes en la primera página
       drawBorders(doc);
       drawHeader(doc);
+      firmas (doc);
+      // drawEncabezado(doc);
+      function drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado) {
+          drawHeader(doc, UPM, activos_fijos, marca);
+          drawEncabezado(doc, UPM, activos_fijos, marca)
+          drawBorders(doc);
+          fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado);
+          firmas (doc);
+      }
 
       // Calcular la posición de inicio de la segunda tabla
       const positionFirstTable = 49.5;
@@ -398,6 +415,7 @@ export default {
 
             // Llamada a la función drawFirstTable con this.items como argumento
       drawFirstTable(this.items);
+      
 
       // Llamada a la función drawSecondTable con this.itemsEquipos como argumento
       drawSecondTable(this.itemsEquipos);
@@ -409,6 +427,7 @@ const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
         startY: positionFirstTable,
         head: [
             [{content: 'Caja de control', colSpan: 9, styles: {halign: 'center'}}],
+            [''],
             ['Nombre del EPP', 'Parte del Cuerpo a Proteger', 'Riesgo Controlado', 'Cargo Asociado', 'Especificación Técnica', 'Mantenimiento', 'Vida Útil', 'Reposición', 'Disposición Final']
         ],
         body: items.map(item => [
@@ -423,8 +442,8 @@ const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
           item.disposicionFinal,
         ]),
         theme: 'striped',
-        margin: { top: 28.5, left: 5.5, right: 5.5 },
-        styles: { fontSize: 8 },
+        margin: { top: 49.5 , left: 5.5, right: 5.5 },
+        styles: { fontSize: 7.5 },
         headerStyles: {
             textColor: '#000',
             fillColor: [200, 200, 200],
@@ -433,8 +452,8 @@ const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
         didDrawPage: function () {
                 const totalPages = doc.internal.getNumberOfPages();
                 if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
+                  drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+                  drawBorders(doc);
                 }
             }        
     });
@@ -444,11 +463,12 @@ const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 function drawSecondTable(itemsEquipos) {
 const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
     if (itemsEquipos.length > 0) {
-        const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 12;
+      const positionSecondTableDynamic = positionFirstTable + heightFirstTable + 30; // Ajusta este valor según sea necesario
         doc.autoTable({
             startY: positionSecondTableDynamic + 2.5,
             head: [
                 [{content: 'Equipos', colSpan: 4, styles: {halign: 'center'}}],
+                [''],
                 ['Cambio', 'Realizado', 'Cantidad', 'Referencia']
             ],
             body: itemsEquipos.map(itemEq => [
@@ -458,18 +478,18 @@ const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
                 itemEq.referenciaEquipo,
             ]),
             theme: 'striped',
-            margin: { top: 28.5, left: 5.5, right: 5.5 },
-            styles: { fontSize: 8 },
+            margin: { top: 49.5 , left: 5.5, right: 5.5 },
+            styles: { fontSize: 6 },
             headerStyles: {
                 textColor: '#000',
                 fillColor: [200, 200, 200],
             },
-            columnWidth: 'auto',
+            columnWidth: '50',
             didDrawPage: function () {
                 const totalPages = doc.internal.getNumberOfPages();
                 if (totalPages > pagePosition) {
-                    drawHeader(doc);
-                    drawBorders(doc);
+                  drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+                  drawBorders(doc);
                 }
             } 
         });

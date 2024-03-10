@@ -462,6 +462,8 @@ function drawSecondTable(doc, items) {
         [''],
         ['Nombre Del EPP', 'Parte del Cuerpo', 'Riesgo Controlado', 'Cargo Asociado'],
       ],
+
+      
       body: items.map(item => [
         item.nombreEpp,
         item.parteCuerpoProteger,

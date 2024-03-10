@@ -475,6 +475,7 @@ function drawSecondTable(doc, items) {
         textColor: '#000',
         fillColor: [200, 200, 200],
       },
+      
       columnWidth: '50',
       didDrawPage: function () {
         const totalPages = doc.internal.getNumberOfPages();

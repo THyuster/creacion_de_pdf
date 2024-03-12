@@ -200,28 +200,28 @@ import 'jspdf-autotable';
 export default {
   data() {
     return {
-      nombreEpp: "elbo",
-      parteCuerpoProteger: "fe",
-      riesgoControlado: "feW",
-      cargoAsociado: "EFW",
-      especificacionTecnica: "gjg",
-      uso: "ghd",
-      mantenimiento: "fah",
-      vidaUtil: "fhd",
-      reposicion: "fdhd",
-      disposicionFinal: "g",
+      nombreEpp: "",
+      parteCuerpoProteger: "",
+      riesgoControlado: "",
+      cargoAsociado: "",
+      especificacionTecnica: "",
+      uso: "",
+      mantenimiento: "",
+      vidaUtil: "",
+      reposicion: "",
+      disposicionFinal: "",
       UPM: "1234567890",
       fecha: "04/03/2024",
       hora: "04:30 p.m.",
       marca: "",
-      activos_fijos: "No activo",
-      cambioEquipo: 'bifo',
-      realizadoEquipo: 'si',
-      cantidadEquipo: '43634',
-      referenciaEquipo: 'sdsg',
-      inspeccionEquipo: 'rgw',
-      estadoEquipo: 'Bueno',
-      observacionesEquipo: 'ninguna',
+      activos_fijos: " ",
+      cambioEquipo: '',
+      realizadoEquipo: '',
+      cantidadEquipo: '',
+      referenciaEquipo: '',
+      inspeccionEquipo: '',
+      estadoEquipo: '',
+      observacionesEquipo: '',
       items: [],
       itemsEquipos: [],
       itemsInspeccionEquipos: [],
@@ -262,23 +262,23 @@ export default {
 
     },
     limpiarCampos() {
-      this.nombreEpp = "sdfh";
-      this.parteCuerpoProteger = "sfhdd";
-      this.riesgoControlado = "sdfh";
-      this.cargoAsociado = "shdfd";
-      this.especificacionTecnica = "sfhfd";
-      this.uso = "hdsf";
-      this.mantenimiento = "fdhsd";
-      this.vidaUtil = "fhdf";
-      this.reposicion = "gfh";
-      this.disposicionFinal = "f";
-      this.cambioEquipo = "fg";
-      this.realizadoEquipo = "si";
-      this.cantidadEquipo = "43567";
-      this.referenciaEquipo = "aifguk";
-      this.inspeccionEquipo = "referencia";
-      this.estadoEquipo = "bueno";
-      this.observacionesEquipo = "aaaa";
+      this.nombreEpp = "";
+      this.parteCuerpoProteger = "";
+      this.riesgoControlado = "";
+      this.cargoAsociado = "";
+      this.especificacionTecnica = "";
+      this.uso = "";
+      this.mantenimiento = "";
+      this.vidaUtil = "";
+      this.reposicion = "";
+      this.disposicionFinal = "";
+      this.cambioEquipo = "";
+      this.realizadoEquipo = "";
+      this.cantidadEquipo = "";
+      this.referenciaEquipo = "";
+      this.inspeccionEquipo = "";
+      this.estadoEquipo = "";
+      this.observacionesEquipo = "";
     },
     async generarPDF() {
       const jsPDF = await import('jspdf');
@@ -417,8 +417,9 @@ if (this.itemsEquipos.length > 0) {
   doc.autoTable({
     startY: startY,
     head: [
+      [{ content: 'Actividades Realizasas E Insumos Realizados', colSpan: 4, styles: { halign: 'center' } }],
+      
       [{ content: 'Caja De Control', colSpan: 4, styles: { halign: 'center' } }],
-      [''],
       ['Cambio', 'Realizado', 'Cantidad', 'Referencia'],
     ],
     body: this.itemsEquipos.map(itemEq => [
@@ -484,9 +485,10 @@ if (this.itemsEquipos.length > 0) {
 
 
 // Actualizar la posición dinámica después de la primera tabla
-const positionFirstTableDynamic = doc.autoTable.previous.finalY - 1;
+const positionFirstTableDynamic = doc.autoTable.previous.finalY + 1.5;
 
 let positionSecondTable = positionFirstTableDynamic;
+
 
 drawSecondTable(doc, this.items);
 
@@ -495,8 +497,7 @@ function drawSecondTable(doc, items) {
 
   if (items.length > 0) {
     // Ajustar la posición de inicio de la segunda tabla en cada nueva página
-    const startY = pagePosition === 1 ? positionSecondTable + 2.5 : positionFirstTableDynamic;
-
+    const startY = pagePosition === 1 ? positionSecondTable : positionFirstTableDynamic + 2.5;
     doc.autoTable({
       startY: startY,
       head: [
@@ -517,7 +518,12 @@ function drawSecondTable(doc, items) {
         textColor: '#000',
         fillColor: [200, 200, 200],
       },
-      columnWidth: 'line',
+      columnStyles: {
+      0: { columnWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
+      1: { columnWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
+      2: { columnWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
+      3: { columnWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
+    },
       didDrawPage: function () {
         const totalPages = doc.internal.getNumberOfPages();
 
@@ -525,6 +531,156 @@ function drawSecondTable(doc, items) {
         if (totalPages > pagePosition) {
           // Ajustar la posición de la segunda tabla en cada nueva página
           positionSecondTable = 50; // Ajustado para comenzar la segunda tabla en la posición 50 en la siguiente página
+          // Dibujar el encabezado y las líneas en la nueva página
+          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+          // Volver a dibujar los márgenes de la página
+          drawBorders(doc);
+        }
+      },
+    });
+  }
+}
+
+let positionSecondTableDynamic = doc.autoTable.previous.finalY + 1.5;
+let  positionThirdTable = positionSecondTableDynamic;
+
+drawThirdTable(doc, this.items)
+
+function drawThirdTable(doc, items) {
+  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+
+  if (items.length > 0) {
+    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+    const startY = pagePosition === 1 ? positionThirdTable : positionSecondTableDynamic + 2.5 ;
+    doc.autoTable({
+      startY: startY,
+      head: [
+        [{ content: 'Actividades Realizadas No Relacionadas', colSpan: 1, styles: { halign: 'center' } }],
+        [''],
+      ],
+      body: items.map(item => [
+        item.reposicion,
+      ]),
+      theme: 'grid',
+      margin: { top: 49.5, left: 5.5, right: 5.5 },
+      styles: { fontSize: 6 },
+      headerStyles: {
+        textColor: '#000',
+        fillColor: [200, 200, 200],
+      },
+      columnStyles: {
+      0: { columnWidth: 199}, // Ancho predeterminado para la columna 0 (Cambio)
+    },
+      didDrawPage: function () {
+        const totalPages = doc.internal.getNumberOfPages();
+
+        // Verificar si estamos en una nueva página
+        if (totalPages > pagePosition) {
+          // Ajustar la posición de la tercera tabla en cada nueva página
+          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
+
+          // Dibujar el encabezado y las líneas en la nueva página
+          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+          // Volver a dibujar los márgenes de la página
+          drawBorders(doc);
+        }
+      },
+    });
+  }
+}
+
+let positionThirdTableDynamic = doc.autoTable.previous.finalY + 1.5;
+let  positionFourTable = positionThirdTableDynamic;
+
+drawFourTable(doc, this.items)
+
+function drawFourTable(doc, items) {
+  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+
+  if (items.length > 0) {
+    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+    const startY = pagePosition === 1 ? positionFourTable : positionThirdTableDynamic + 2.5 ;
+    doc.autoTable({
+      startY: startY,
+      head: [
+        [{ content: 'Inspeccion de Equipos', colSpan: 3, styles: { halign: 'center' } }],
+        [''],
+        ['Disposicion Final', 'Vida util', 'Uso'],
+      ],
+      body: items.map(items => [
+        items.disposicionFinal,
+        items.vidaUtil,
+        items.uso,
+      ]),
+
+      theme: 'grid',
+      margin: { top: 49.5, left: 5.5, right: 5.5 },
+      styles: { fontSize: 6 },
+      headerStyles: {
+        textColor: '#000',
+        fillColor: [200, 200, 200],
+      },
+      columnStyles: {
+      0: { columnWidth: 60}, // Ancho predeterminado para la columna 0 (disposicion final)
+      1: { columnWidth: 60}, // Ancho preterminado para la columna 1 (vida util)
+      2: { columnWidth: 79}, // Ancho preterminado para la columna 2 (uso)
+    },
+      didDrawPage: function () {
+        const totalPages = doc.internal.getNumberOfPages();
+
+        // Verificar si estamos en una nueva página
+        if (totalPages > pagePosition) {
+          // Ajustar la posición de la tercera tabla en cada nueva página
+          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
+
+          // Dibujar el encabezado y las líneas en la nueva página
+          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+          // Volver a dibujar los márgenes de la página
+          drawBorders(doc);
+        }
+      },
+    });
+  }
+}
+
+let positionFourTableDynamic = doc.autoTable.previous.finalY + 1.5;
+let  positionFiveTable = positionFourTableDynamic;
+
+drawFiveTable(doc, this.items)
+
+function drawFiveTable(doc, items) {
+  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+
+  if (items.length > 0) {
+    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+    const startY = pagePosition === 1 ? positionFiveTable : positionFourTableDynamic + 2.5 ;
+    doc.autoTable({
+      startY: startY,
+      head: [
+        [{ content: 'Observaciones/Recomendaciones', colSpan: 1, styles: { halign: 'center' } }],
+        [''],
+      ],
+      body: items.map(items => [
+        items.mantenimiento,
+      ]),
+
+      theme: 'grid',
+      margin: { top: 49.5, left: 5.5, right: 5.5 },
+      styles: { fontSize: 6 },
+      headerStyles: {
+        textColor: '#000',
+        fillColor: [200, 200, 200],
+      },
+      columnStyles: {
+      0: { columnWidth: 199}, // Ancho predeterminado para la columna 0 (mantenimiento)
+    },
+      didDrawPage: function () {
+        const totalPages = doc.internal.getNumberOfPages();
+
+        // Verificar si estamos en una nueva página
+        if (totalPages > pagePosition) {
+          // Ajustar la posición de la tercera tabla en cada nueva página
+          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
 
           // Dibujar el encabezado y las líneas en la nueva página
           drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);

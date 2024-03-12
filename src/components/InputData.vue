@@ -434,7 +434,13 @@ if (this.itemsEquipos.length > 0) {
       textColor: '#000',
       fillColor: [200, 200, 200],
     },
-    columnWidth: [5, 30, 20, 50],
+    columnStyles: {
+      0: { columnWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
+      1: { columnWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
+      2: { columnWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
+      3: { columnWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
+    },
+    // columnWidth: [5, 30, 20, 50],
     didDrawPage: function () {
       drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
     },
@@ -478,7 +484,7 @@ if (this.itemsEquipos.length > 0) {
 
 
 // Actualizar la posición dinámica después de la primera tabla
-const positionFirstTableDynamic = doc.autoTable.previous.finalY + 2;
+const positionFirstTableDynamic = doc.autoTable.previous.finalY - 1;
 
 let positionSecondTable = positionFirstTableDynamic;
 

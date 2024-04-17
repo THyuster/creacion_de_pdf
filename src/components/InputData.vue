@@ -330,7 +330,7 @@ export default {
         doc.text('Página', 176, 9)
         for (let i = 1; i <= totalPages; i++) {
           doc.setPage(i);
-          doc.text(`${i}`, doc.internal.pageSize.width - 30, 15); 
+          doc.text(`${i} de` + totalPages, doc.internal.pageSize.width - 30, 15); 
       }
         doc.line(5, 28, doc.internal.pageSize.width - 5, 28);
         doc.line(46, 17, doc.internal.pageSize.width - 5, 17);
@@ -340,6 +340,7 @@ export default {
         doc.line(120, 23, doc.internal.pageSize.width - 5, 23);
         doc.line(160, 5, 160, doc.internal.pageSize.height - 269);
       }
+      drawHeader(doc)
 
       function generarSerial() {
         const caracteres = 'ABC1234567890';
@@ -406,293 +407,296 @@ export default {
           drawBorders(doc);
           fechahoramatenimientoR(doc, hora, fecha, mantenimiento_realizado);
       } 
-// Variable para la posición de la primera tabla en la página
-let positionFirstTable = 49.5;
-// let positionSecondTable = positionFirstTable;
+      // Variable para la posición de la primera tabla en la página
+      let positionFirstTable = 49.5;
+      // let positionSecondTable = positionFirstTable;
 
-if (this.itemsEquipos.length > 0) {
-  // Ajustar la posición de inicio de la primera tabla en cada nueva página
-  const startY = doc.internal.getCurrentPageInfo().pageNumber === 1 ? positionFirstTable : 49.5;
+      if (this.itemsEquipos.length > 0) {
+        // Ajustar la posición de inicio de la primera tabla en cada nueva página
+        const startY = doc.internal.getCurrentPageInfo().pageNumber === 1 ? positionFirstTable : 49.5;
 
-  doc.autoTable({
-    startY: startY,
-    head: [
-      [{ content: 'Actividades Realizasas E Insumos Realizados', colSpan: 4, styles: { halign: 'center' } }],
-      
-      [{ content: 'Caja De Control', colSpan: 4, styles: { halign: 'center' } }],
-      ['Cambio', 'Realizado', 'Cantidad', 'Referencia'],
-    ],
-    body: this.itemsEquipos.map(itemEq => [
-      itemEq.cambioEquipo,
-      itemEq.realizadoEquipo,
-      itemEq.cantidadEquipo,
-      itemEq.referenciaEquipo,
-    ]),
-    theme: 'grid',
-    margin: { top: 49.5, left: 5.5, right: 5.5 },
-    styles: { fontSize: 6 },
-    headerStyles: {
-      textColor: '#000',
-      fillColor: [200, 200, 200],
-    },
-    columnStyles: {
-      0: { columnWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
-      1: { columnWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
-      2: { columnWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
-      3: { columnWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
-    },
-    // columnWidth: [5, 30, 20, 50],
-    didDrawPage: function () {
-      drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
-    },
-    didDrawCell: function (data) {
-      // Comprobación para evitar el error
-      if (typeof data.cell.text === 'string' && data.cell.text.length > 0) {
-        // Establecer un ancho máximo para la primera columna (Cambio)
-        if (data.column.index === 0 && data.row.index > 0) {
-          const maxWidth = 40; // Establecer el ancho máximo deseado
-          const text = data.cell.text;
+        doc.autoTable({
+          startY: startY,
+          head: [
+            [{ content: 'Actividades Realizasas E Insumos Realizados', colSpan: 4, styles: { halign: 'center' } }],
+            
+            [{ content: 'Caja De Control', colSpan: 4, styles: { halign: 'center' } }],
+            ['Cambio', 'Realizado', 'Cantidad', 'Referencia'],
+          ],
+          body: this.itemsEquipos.map(itemEq => [
+            itemEq.cambioEquipo,
+            itemEq.realizadoEquipo,
+            itemEq.cantidadEquipo,
+            itemEq.referenciaEquipo,
+          ]),
+          theme: 'grid',
+          margin: { top: 49.5, left: 5.5, right: 5.5 },
+          styles: { fontSize: 6 },
+          headStyles: {
+            textColor: '#000',
+            fillColor: [200, 200, 200],
+          },
+          columnStyles: {
+            0: { cellWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
+            1: { cellWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
+            2: { cellWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
+            3: { cellWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
+          },
+          
+          // columnWidth: [5, 30, 20, 50],
+          didDrawPage: function () {
+            drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+          },
+          didDrawCell: function (data) {
+            // Comprobación para evitar el error
+            if (typeof data.cell.text === 'string' && data.cell.text.length > 0) {
+              // Establecer un ancho máximo para la primera columna (Cambio)
+              if (data.column.index === 0 && data.row.index > 0) {
+                const maxWidth = 40; // Establecer el ancho máximo deseado
+                const text = data.cell.text;
 
-          if (doc.getStringUnitWidth(text) * doc.internal.scaleFactor > maxWidth) {
-            // Si el texto supera el ancho máximo permitido, dividirlo en varias líneas
-            const words = text.split(' ');
-            let line = '';
-            let y = data.cell.y;
-            const cellHeight = data.cell.height;
+                if (doc.getStringUnitWidth(text) * doc.internal.scaleFactor > maxWidth) {
+                  // Si el texto supera el ancho máximo permitido, dividirlo en varias líneas
+                  const words = text.split(' ');
+                  let line = '';
+                  let y = data.cell.y;
+                  const cellHeight = data.cell.height;
 
-            for (let i = 0; i < words.length; i++) {
-              const testLine = line + words[i] + ' ';
-              const testWidth = doc.getStringUnitWidth(testLine) * doc.internal.scaleFactor;
+                  
 
-              if (testWidth > maxWidth) {
-                doc.text(line, data.cell.x, y);
-                line = words[i] + ' ';
-                y += cellHeight;
-              } else {
-                line = testLine;
+                  for (let i = 0; i < words.length; i++) {
+                    const testLine = line + words[i] + ' ';
+                    const testWidth = doc.getStringUnitWidth(testLine) * doc.internal.scaleFactor;
+
+                    if (testWidth > maxWidth) {
+                      doc.text(line, data.cell.x, y);
+                      line = words[i] + ' ';
+                      y += cellHeight;
+                    } else {
+                      line = testLine;
+                    }
+                  }
+                  doc.text(line, data.cell.x, y);
+                } else {
+                  // Si el texto cabe dentro del ancho máximo, dibujarlo normalmente
+                  doc.text(data.cell.text, data.cell.x, data.cell.y);
+                }
               }
             }
-            doc.text(line, data.cell.x, y);
-          } else {
-            // Si el texto cabe dentro del ancho máximo, dibujarlo normalmente
-            doc.text(data.cell.text, data.cell.x, data.cell.y);
-          }
+          },
+        });
+      }
+
+
+      // Actualizar la posición dinámica después de la primera tabla
+      const positionFirstTableDynamic = doc.autoTable.previous.finalY + 1.5;
+
+      let positionSecondTable = positionFirstTableDynamic;
+
+
+      drawSecondTable(doc, this.items);
+
+      function drawSecondTable(doc, items) {
+        const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+
+        if (items.length > 0) {
+          // Ajustar la posición de inicio de la segunda tabla en cada nueva página
+          const startY = pagePosition === 1 ? positionSecondTable : positionFirstTableDynamic + 2.5;
+          doc.autoTable({ 
+            startY: startY,
+            head: [
+              [{ content: 'Equipo', colSpan: 4, styles: { halign: 'center' } }],
+              [''],
+              ['Nombre Del EPP', 'Parte del Cuerpo', 'Riesgo Controlado', 'Cargo Asociado'],
+            ],
+            body: items.map(item => [
+              item.nombreEpp,
+              item.parteCuerpoProteger,
+              item.riesgoControlado,
+              item.cargoAsociado,
+            ]),
+            theme: 'grid',
+            margin: { top: 49.5, left: 5.5, right: 5.5 },
+            styles: { fontSize: 6 },
+            headStyles: {
+              textColor: '#000',
+              fillColor: [200, 200, 200],
+            },
+            columnStyles: {
+            0: { cellWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
+            1: { cellWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
+            2: { cellWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
+            3: { cellWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
+          },
+            // didDrawPage: function () {
+            //   const totalPages = doc.internal.getNumberOfPages();
+
+            //   // Verificar si estamos en una nueva página
+            //   if (totalPages > pagePosition) {
+            //     // Ajustar la posición de la segunda tabla en cada nueva página
+            //     positionSecondTable = 50; // Ajustado para comenzar la segunda tabla en la posición 50 en la siguiente página
+            //     // Dibujar el encabezado y las líneas en la nueva página
+            //     drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+            //     // Volver a dibujar los márgenes de la página
+            //     drawBorders(doc);
+            //   }
+            // },
+          });
         }
       }
-    },
-  });
-}
 
+      let positionSecondTableDynamic = doc.autoTable.previous.finalY + 1.5;
+      let  positionThirdTable = positionSecondTableDynamic;
 
-// Actualizar la posición dinámica después de la primera tabla
-const positionFirstTableDynamic = doc.autoTable.previous.finalY + 1.5;
+      drawThirdTable(doc, this.items)
 
-let positionSecondTable = positionFirstTableDynamic;
+      function drawThirdTable(doc, items) {
+        const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
+        if (items.length > 0) {
+          // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+          const startY = pagePosition === 1 ? positionThirdTable : positionSecondTableDynamic + 2.5 ;
+          doc.autoTable({
+            startY: startY,
+            head: [
+              [{ content: 'Actividades Realizadas No Relacionadas', colSpan: 1, styles: { halign: 'center' } }],
+              [''],
+            ],
+            body: items.map(item => [
+              item.reposicion,
+            ]),
+            theme: 'grid',
+            margin: { top: 49.5, left: 5.5, right: 5.5 },
+            styles: { fontSize: 6 },
+            headStyles: {
+              textColor: '#000',
+              fillColor: [200, 200, 200],
+            },
+            columnStyles: {
+            0: { cellWidth: 199}, // Ancho predeterminado para la columna 0 (Cambio)
+          },
+            didDrawPage: function () {
+              const totalPages = doc.internal.getNumberOfPages();
 
-drawSecondTable(doc, this.items);
+              // Verificar si estamos en una nueva página
+              if (totalPages > pagePosition) {
+                // Ajustar la posición de la tercera tabla en cada nueva página
+                positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
 
-function drawSecondTable(doc, items) {
-  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
-
-  if (items.length > 0) {
-    // Ajustar la posición de inicio de la segunda tabla en cada nueva página
-    const startY = pagePosition === 1 ? positionSecondTable : positionFirstTableDynamic + 2.5;
-    doc.autoTable({
-      startY: startY,
-      head: [
-        [{ content: 'Equipo', colSpan: 4, styles: { halign: 'center' } }],
-        [''],
-        ['Nombre Del EPP', 'Parte del Cuerpo', 'Riesgo Controlado', 'Cargo Asociado'],
-      ],
-      body: items.map(item => [
-        item.nombreEpp,
-        item.parteCuerpoProteger,
-        item.riesgoControlado,
-        item.cargoAsociado,
-      ]),
-      theme: 'grid',
-      margin: { top: 49.5, left: 5.5, right: 5.5 },
-      styles: { fontSize: 6 },
-      headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200],
-      },
-      columnStyles: {
-      0: { columnWidth: 50 }, // Ancho predeterminado para la columna 0 (Cambio)
-      1: { columnWidth: 50 }, // Ancho predeterminado para la columna 1 (Realizado)
-      2: { columnWidth: 50 }, // Ancho predeterminado para la columna 2 (Cantidad)
-      3: { columnWidth: 49 }, // Ancho predeterminado para la columna 3 (Referencia)
-    },
-      didDrawPage: function () {
-        const totalPages = doc.internal.getNumberOfPages();
-
-        // Verificar si estamos en una nueva página
-        if (totalPages > pagePosition) {
-          // Ajustar la posición de la segunda tabla en cada nueva página
-          positionSecondTable = 50; // Ajustado para comenzar la segunda tabla en la posición 50 en la siguiente página
-          // Dibujar el encabezado y las líneas en la nueva página
-          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
-          // Volver a dibujar los márgenes de la página
-          drawBorders(doc);
+                // Dibujar el encabezado y las líneas en la nueva página
+                drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+                // Volver a dibujar los márgenes de la página
+                drawBorders(doc);
+              }
+            },
+          });
         }
-      },
-    });
-  }
-}
+      }
 
-let positionSecondTableDynamic = doc.autoTable.previous.finalY + 1.5;
-let  positionThirdTable = positionSecondTableDynamic;
+      let positionThirdTableDynamic = doc.autoTable.previous.finalY + 1.5;
+      let  positionFourTable = positionThirdTableDynamic;
 
-drawThirdTable(doc, this.items)
+      drawFourTable(doc, this.items)
 
-function drawThirdTable(doc, items) {
-  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+      function drawFourTable(doc, items) {
+        const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
-  if (items.length > 0) {
-    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
-    const startY = pagePosition === 1 ? positionThirdTable : positionSecondTableDynamic + 2.5 ;
-    doc.autoTable({
-      startY: startY,
-      head: [
-        [{ content: 'Actividades Realizadas No Relacionadas', colSpan: 1, styles: { halign: 'center' } }],
-        [''],
-      ],
-      body: items.map(item => [
-        item.reposicion,
-      ]),
-      theme: 'grid',
-      margin: { top: 49.5, left: 5.5, right: 5.5 },
-      styles: { fontSize: 6 },
-      headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200],
-      },
-      columnStyles: {
-      0: { columnWidth: 199}, // Ancho predeterminado para la columna 0 (Cambio)
-    },
-      didDrawPage: function () {
-        const totalPages = doc.internal.getNumberOfPages();
+        if (items.length > 0) {
+          // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+          const startY = pagePosition === 1 ? positionFourTable : positionThirdTableDynamic + 2.5 ;
+          doc.autoTable({
+            startY: startY,
+            head: [
+              [{ content: 'Inspeccion de Equipos', colSpan: 3, styles: { halign: 'center' } }],
+              [''],
+              ['Disposicion Final', 'Vida util', 'Uso'],
+            ],
+            body: items.map(items => [
+              items.disposicionFinal,
+              items.vidaUtil,
+              items.uso,
+            ]),
 
-        // Verificar si estamos en una nueva página
-        if (totalPages > pagePosition) {
-          // Ajustar la posición de la tercera tabla en cada nueva página
-          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
+            theme: 'grid',
+            margin: { top: 49.5, left: 5.5, right: 5.5 },
+            styles: { fontSize: 6 },
+            headStyles: {
+              textColor: '#000',
+              fillColor: [200, 200, 200],
+            },
+            columnStyles: {
+            0: { cellWidth: 60}, // Ancho predeterminado para la columna 0 (disposicion final)
+            1: { cellWidth: 60}, // Ancho preterminado para la columna 1 (vida util)
+            2: { cellWidth: 79}, // Ancho preterminado para la columna 2 (uso)
+          },
+            didDrawPage: function () {
+              const totalPages = doc.internal.getNumberOfPages();
 
-          // Dibujar el encabezado y las líneas en la nueva página
-          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
-          // Volver a dibujar los márgenes de la página
-          drawBorders(doc);
+              // Verificar si estamos en una nueva página
+              if (totalPages > pagePosition) {
+                // Ajustar la posición de la tercera tabla en cada nueva página
+                positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
+
+                // Dibujar el encabezado y las líneas en la nueva página
+                drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+                // Volver a dibujar los márgenes de la página
+                drawBorders(doc);
+              }
+            },
+          });
         }
-      },
-    });
-  }
-}
+      }
 
-let positionThirdTableDynamic = doc.autoTable.previous.finalY + 1.5;
-let  positionFourTable = positionThirdTableDynamic;
+      let positionFourTableDynamic = doc.autoTable.previous.finalY + 1.5;
+      let  positionFiveTable = positionFourTableDynamic;
 
-drawFourTable(doc, this.items)
+      drawFiveTable(doc, this.items)
 
-function drawFourTable(doc, items) {
-  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
+      function drawFiveTable(doc, items) {
+        const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
 
-  if (items.length > 0) {
-    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
-    const startY = pagePosition === 1 ? positionFourTable : positionThirdTableDynamic + 2.5 ;
-    doc.autoTable({
-      startY: startY,
-      head: [
-        [{ content: 'Inspeccion de Equipos', colSpan: 3, styles: { halign: 'center' } }],
-        [''],
-        ['Disposicion Final', 'Vida util', 'Uso'],
-      ],
-      body: items.map(items => [
-        items.disposicionFinal,
-        items.vidaUtil,
-        items.uso,
-      ]),
+        if (items.length > 0) {
+          // Ajustar la posición de inicio de la tercera tabla en cada nueva página
+          const startY = pagePosition === 1 ? positionFiveTable : positionFourTableDynamic + 2.5 ;
+          doc.autoTable({
+            startY: startY,
+            head: [
+              [{ content: 'Observaciones/Recomendaciones', colSpan: 1, styles: { halign: 'center' } }],
+              [''],
+            ],
+            body: items.map(items => [
+              items.mantenimiento,
+            ]),
 
-      theme: 'grid',
-      margin: { top: 49.5, left: 5.5, right: 5.5 },
-      styles: { fontSize: 6 },
-      headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200],
-      },
-      columnStyles: {
-      0: { columnWidth: 60}, // Ancho predeterminado para la columna 0 (disposicion final)
-      1: { columnWidth: 60}, // Ancho preterminado para la columna 1 (vida util)
-      2: { columnWidth: 79}, // Ancho preterminado para la columna 2 (uso)
-    },
-      didDrawPage: function () {
-        const totalPages = doc.internal.getNumberOfPages();
+            theme: 'grid',
+            margin: { top: 49.5, left: 5.5, right: 5.5 },
+            styles: { fontSize: 6 },
+            headStyles: {
+              textColor: '#000',
+              fillColor: [200, 200, 200],
+            },
+            columnStyles: {
+            0: { cellWidth: 199}, // Ancho predeterminado para la columna 0 (mantenimiento)
+          },
+            didDrawPage: function () {
+              const totalPages = doc.internal.getNumberOfPages();
 
-        // Verificar si estamos en una nueva página
-        if (totalPages > pagePosition) {
-          // Ajustar la posición de la tercera tabla en cada nueva página
-          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
+              // Verificar si estamos en una nueva página
+              if (totalPages > pagePosition) {
+                // Ajustar la posición de la tercera tabla en cada nueva página
+                positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
 
-          // Dibujar el encabezado y las líneas en la nueva página
-          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
-          // Volver a dibujar los márgenes de la página
-          drawBorders(doc);
+                // Dibujar el encabezado y las líneas en la nueva página
+                drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
+                // Volver a dibujar los márgenes de la página
+                drawBorders(doc);
+              }
+            },
+          });
         }
-      },
-    });
-  }
-}
-
-let positionFourTableDynamic = doc.autoTable.previous.finalY + 1.5;
-let  positionFiveTable = positionFourTableDynamic;
-
-drawFiveTable(doc, this.items)
-
-function drawFiveTable(doc, items) {
-  const pagePosition = doc.internal.getCurrentPageInfo().pageNumber;
-
-  if (items.length > 0) {
-    // Ajustar la posición de inicio de la tercera tabla en cada nueva página
-    const startY = pagePosition === 1 ? positionFiveTable : positionFourTableDynamic + 2.5 ;
-    doc.autoTable({
-      startY: startY,
-      head: [
-        [{ content: 'Observaciones/Recomendaciones', colSpan: 1, styles: { halign: 'center' } }],
-        [''],
-      ],
-      body: items.map(items => [
-        items.mantenimiento,
-      ]),
-
-      theme: 'grid',
-      margin: { top: 49.5, left: 5.5, right: 5.5 },
-      styles: { fontSize: 6 },
-      headerStyles: {
-        textColor: '#000',
-        fillColor: [200, 200, 200],
-      },
-      columnStyles: {
-      0: { columnWidth: 199}, // Ancho predeterminado para la columna 0 (mantenimiento)
-    },
-      didDrawPage: function () {
-        const totalPages = doc.internal.getNumberOfPages();
-
-        // Verificar si estamos en una nueva página
-        if (totalPages > pagePosition) {
-          // Ajustar la posición de la tercera tabla en cada nueva página
-          positionSecondTable = 50; // Ajustado para comenzar la tercera tabla en la posición 50 en la siguiente página
-
-          // Dibujar el encabezado y las líneas en la nueva página
-          drawHeaderAndLines(doc, UPM, activos_fijos, marca, hora, fecha, mantenimiento_realizado);
-          // Volver a dibujar los márgenes de la página
-          drawBorders(doc);
-        }
-      },
-    });
-  }
-}
+      }
   firmas (doc);
-  doc.save('informacion.pdf');
+  doc.save('informacion del pdf.pdf');
 }
     },
   };
